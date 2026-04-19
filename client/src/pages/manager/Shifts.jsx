@@ -33,6 +33,23 @@ const statusColors = {
   cancelled: 'gray',
 };
 
+const EARLY_ARRIVAL_BUFFER_MINUTES = 15;
+
+const calculatePaidHours = (startTime, endTime) => {
+  const [sH, sM] = startTime.split(':').map(Number);
+  const [eH, eM] = endTime.split(':').map(Number);
+
+  let startMins = sH * 60 + sM;
+  let endMins = eH * 60 + eM;
+
+  if (endMins < startMins) {
+    endMins += 24 * 60;
+  }
+
+  const paidMinutes = Math.max(0, endMins - startMins - EARLY_ARRIVAL_BUFFER_MINUTES);
+  return (paidMinutes / 60).toFixed(2);
+};
+
 const savedViewKey = 'mugal-azam-shifts-view';
 
 const ShiftsPage = () => {
@@ -742,17 +759,7 @@ const ShiftsPage = () => {
           {formData.startTime && formData.endTime && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <p className="text-sm text-green-900">
-                <strong>Calculated Hours:</strong> {
-                  (() => {
-                    const [sH, sM] = formData.startTime.split(':').map(Number);
-                    const [eH, eM] = formData.endTime.split(':').map(Number);
-                    let startMins = sH * 60 + sM;
-                    let endMins = eH * 60 + eM;
-                    if (endMins < startMins) endMins += 24 * 60;
-                    const hours = ((endMins - startMins) / 60).toFixed(2);
-                    return `${hours}h`;
-                  })()
-                }
+                <strong>Calculated Paid Hours:</strong> {`${calculatePaidHours(formData.startTime, formData.endTime)}h`}
               </p>
             </div>
           )}
