@@ -6,3 +6,4 @@ export { default as PayrollPage } from './Payroll';
 export { default as ProfilePage } from './Profile';
 export { default as AvailabilityPage } from './Availability';
 export { default as AnnouncementsPage } from './Announcements';
+export { default as ReportsPage } from './Reports';

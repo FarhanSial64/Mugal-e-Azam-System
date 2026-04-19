@@ -7,6 +7,8 @@ import {
   checkAvailability,
 } from '../controllers/availabilityController.js';
 import { protect, managerOnly } from '../middlewares/auth.js';
+import { validate } from '../middlewares/validate.js';
+import { setAvailabilitySchema } from '../utils/validators.js';
 
 const router = express.Router();
 
@@ -16,7 +18,7 @@ router.use(protect);
 // Employee routes
 router.route('/my')
   .get(getMyAvailability)
-  .put(setMyAvailability);
+  .put(validate(setAvailabilitySchema), setMyAvailability);
 
 // Manager routes
 router.get('/', managerOnly, getAllAvailability);

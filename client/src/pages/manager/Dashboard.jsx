@@ -11,7 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { dashboardAPI } from '../../services/api';
 import { DashboardLayout } from '../../components/layout';
 import {
@@ -34,6 +34,7 @@ import {
   SparklesIcon,
   ClipboardDocumentCheckIcon,
   CreditCardIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -47,9 +48,9 @@ const statusMeta = {
 
 const quickActions = [
   {
-    title: 'Assign Shift',
-    description: 'Build the rota and notify staff.',
-    href: '/manager/shifts',
+    title: 'Bulk Shift Assign',
+    description: 'Assign the same shift to multiple staff at once.',
+    href: '/manager/bulk-shifts',
     icon: CalendarDaysIcon,
     tone: 'bg-sky-50 text-sky-700 ring-sky-100',
   },
@@ -68,11 +69,11 @@ const quickActions = [
     tone: 'bg-amber-50 text-amber-700 ring-amber-100',
   },
   {
-    title: 'Record Payment',
-    description: 'Mark completed payrolls as paid.',
-    href: '/manager/payroll',
-    icon: CreditCardIcon,
-    tone: 'bg-rose-50 text-rose-700 ring-rose-100',
+    title: 'View Reports',
+    description: 'Analytics and spending reports.',
+    href: '/manager/reports',
+    icon: ChartBarIcon,
+    tone: 'bg-purple-50 text-purple-700 ring-purple-100',
   },
 ];
 
@@ -121,12 +122,41 @@ const ManagerDashboard = () => {
   }, [data]);
 
   const laborChartData = useMemo(() => {
-    return (data?.analytics?.weeklyLabor || []).map((entry) => ({
-      week: format(new Date(entry._id), 'MMM d'),
-      pay: entry.totalNetPay,
-      hours: entry.totalHours,
-      overtime: entry.overtimeHours,
+    const today = new Date();
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const currentWeekEnd = endOfWeek(today, { weekStartsOn: 1 });
+    
+    return (data?.analytics?.weeklyLabor || []).map((entry) => {
+      // Format as current date range if this is the current week, otherwise show the week start date
+      const entryDate = new Date(entry._id);
+      const isCurrent = entryDate >= currentWeekStart && entryDate <= currentWeekEnd;
+      const displayDate = isCurrent ? format(today, 'MMM d') : format(entryDate, 'MMM d');
+      
+      return {
+        week: displayDate,
+        pay: entry.totalNetPay,
+        hours: entry.totalHours,
+        overtime: entry.overtimeHours,
+      };
+    });
+  }, [data]);
+
+  const internalNotices = useMemo(() => {
+    const notificationItems = (data?.recentNotifications || []).map((item) => ({
+      ...item,
+      source: 'notification',
+      sortDate: item.createdAt,
     }));
+
+    const announcementItems = (data?.recentAnnouncements || []).map((item) => ({
+      ...item,
+      source: 'announcement',
+      sortDate: item.createdAt,
+    }));
+
+    return [...notificationItems, ...announcementItems]
+      .sort((left, right) => new Date(right.sortDate) - new Date(left.sortDate))
+      .slice(0, 5);
   }, [data]);
 
   if (loading) {
@@ -452,9 +482,9 @@ const ManagerDashboard = () => {
           </Card>
 
           <Card title="Internal Notices" subtitle="Recent notifications and important updates">
-            {data?.recentNotifications?.length > 0 ? (
+            {internalNotices.length > 0 ? (
               <div className="space-y-3">
-                {data.recentNotifications.map((notice) => (
+                {internalNotices.map((notice) => (
                   <div key={notice._id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -464,13 +494,32 @@ const ManagerDashboard = () => {
                         </div>
                         <p className="mt-2 text-sm text-slate-600">{notice.message}</p>
                       </div>
-                      <Badge variant={notice.isRead ? 'gray' : 'info'}>
-                        {notice.isRead ? 'Read' : 'New'}
+                      <Badge
+                        variant={
+                          notice.source === 'announcement'
+                            ? notice.isPinned
+                              ? 'warning'
+                              : notice.priority === 'high'
+                                ? 'danger'
+                                : 'info'
+                            : notice.isRead
+                              ? 'gray'
+                              : 'info'
+                        }
+                      >
+                        {notice.source === 'announcement'
+                          ? notice.isPinned
+                            ? 'Pinned'
+                            : notice.priority
+                          : notice.isRead
+                            ? 'Read'
+                            : 'New'}
                       </Badge>
                     </div>
-                    <p className="mt-3 text-xs text-slate-500">
-                      {format(new Date(notice.createdAt), 'MMM d, h:mm a')}
-                    </p>
+                    <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                      <span>{notice.source === 'announcement' ? notice.createdBy?.name || 'Manager' : 'System'}</span>
+                      <span>{format(new Date(notice.createdAt), 'MMM d, h:mm a')}</span>
+                    </div>
                   </div>
                 ))}
               </div>

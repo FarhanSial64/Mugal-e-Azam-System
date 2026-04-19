@@ -94,6 +94,26 @@ export const updateShiftSchema = z.object({
   breakDuration: z.number().min(0).optional(),
 });
 
+const availabilityDaySchema = z.object({
+  isAvailable: z.boolean().optional(),
+  startTime: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:mm)').optional(),
+  endTime: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:mm)').optional(),
+  notes: z.string().max(200).optional(),
+});
+
+export const setAvailabilitySchema = z.object({
+  weekStart: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: 'Invalid date format',
+  }),
+  monday: availabilityDaySchema.optional(),
+  tuesday: availabilityDaySchema.optional(),
+  wednesday: availabilityDaySchema.optional(),
+  thursday: availabilityDaySchema.optional(),
+  friday: availabilityDaySchema.optional(),
+  saturday: availabilityDaySchema.optional(),
+  sunday: availabilityDaySchema.optional(),
+});
+
 // Attendance validation
 export const checkInSchema = z.object({
   shiftId: z.string().min(1, 'Shift ID is required'),
@@ -138,6 +158,7 @@ export default {
   updateEmployeeSchema,
   createShiftSchema,
   updateShiftSchema,
+  setAvailabilitySchema,
   checkInSchema,
   checkOutSchema,
   calculatePayrollSchema,

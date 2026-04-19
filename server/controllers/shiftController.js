@@ -283,7 +283,7 @@ export const bulkCreateShifts = asyncHandler(async (req, res) => {
 
   for (const shiftData of shifts) {
     try {
-      const { employee, date, startTime, endTime, shiftType, notes } = shiftData;
+      const { employee, date, startTime, endTime, shiftType, notes, breakDuration } = shiftData;
 
       // Check if date is in the past
       const shiftDate = new Date(date);
@@ -308,6 +308,23 @@ export const bulkCreateShifts = asyncHandler(async (req, res) => {
           });
           continue;
         }
+      }
+
+      const employeeUser = await User.findById(employee);
+      if (!employeeUser) {
+        results.failed.push({
+          ...shiftData,
+          error: 'Employee not found',
+        });
+        continue;
+      }
+
+      if (!employeeUser.isActive) {
+        results.failed.push({
+          ...shiftData,
+          error: 'Cannot assign shift to inactive employee',
+        });
+        continue;
       }
 
       // Check for overlap
@@ -340,12 +357,12 @@ export const bulkCreateShifts = asyncHandler(async (req, res) => {
         shiftType: shiftType || getShiftType(startTime, endTime),
         assignedBy: req.user._id,
         notes,
+        breakDuration: breakDuration || 0,
       });
 
       results.created.push(shift);
 
       // Send notification
-      const employeeUser = await User.findById(employee);
       if (employeeUser) {
         try {
           await notifyShiftAssigned(employeeUser, shift);
@@ -389,10 +406,16 @@ export const updateShift = asyncHandler(async (req, res) => {
     endTime: shift.endTime,
     shiftType: shift.shiftType,
     status: shift.status,
+    breakDuration: shift.breakDuration,
   };
 
+  const dateChanged = date && new Date(date).toDateString() !== new Date(originalShift.date).toDateString();
+  const timeChanged = (startTime && startTime !== originalShift.startTime) || (endTime && endTime !== originalShift.endTime);
+  const breakChanged = breakDuration !== undefined && breakDuration !== shift.breakDuration;
+  const statusChanged = status && status !== originalShift.status;
+
   // Check for overlap if time is being changed
-  if ((startTime && startTime !== shift.startTime) || (endTime && endTime !== shift.endTime)) {
+  if (dateChanged || timeChanged) {
     const hasOverlap = await Shift.hasOverlap(
       shift.employee._id || shift.employee,
       date || shift.date,
@@ -405,36 +428,25 @@ export const updateShift = asyncHandler(async (req, res) => {
     }
   }
 
-  const updatedShift = await Shift.findByIdAndUpdate(
-    req.params.id,
-    {
-      date: date ? new Date(date) : shift.date,
-      startTime: startTime || shift.startTime,
-      endTime: endTime || shift.endTime,
-      shiftType: shiftType || shift.shiftType,
-      status: status || shift.status,
-      notes: notes !== undefined ? notes : shift.notes,
-      breakDuration: breakDuration !== undefined ? breakDuration : shift.breakDuration,
-    },
-    { new: true, runValidators: true }
-  )
-    .populate('employee', 'name email phone jobRole notificationPreferences')
-    .populate('assignedBy', 'name');
+  shift.date = date ? new Date(date) : shift.date;
+  shift.startTime = startTime || shift.startTime;
+  shift.endTime = endTime || shift.endTime;
+  shift.shiftType = shiftType || shift.shiftType;
+  shift.status = status || shift.status;
+  shift.notes = notes !== undefined ? notes : shift.notes;
+  shift.breakDuration = breakDuration !== undefined ? breakDuration : shift.breakDuration;
 
-  // If this is a completed shift and times were changed, recalculate payroll
+  const updatedShift = await shift.save();
+  await updatedShift.populate('employee', 'name email phone jobRole notificationPreferences');
+  await updatedShift.populate('assignedBy', 'name');
+
+  // If this is a completed shift and time/state changed, recalculate payroll
   const isCompleted = updatedShift.status === 'completed';
-  const timesChanged = (startTime && startTime !== originalShift.startTime) || 
-                       (endTime && endTime !== originalShift.endTime) ||
-                       (breakDuration !== undefined && breakDuration !== shift.breakDuration);
-  
-  if (isCompleted && timesChanged) {
+  const payrollNeedsRefresh = isCompleted && (dateChanged || timeChanged || breakChanged || statusChanged);
+
+  if (payrollNeedsRefresh) {
     try {
-      // Recalculate hours for this shift (trigger pre-save hook)
-      const shiftToRecalc = await Shift.findById(updatedShift._id);
-      await shiftToRecalc.save();
-      
-      // Recalculate payroll for this week
-      const payroll = await Payroll.calculateForShift(shiftToRecalc, User);
+      const payroll = await Payroll.calculateForShift(updatedShift, User);
       if (payroll) {
         console.log(`📊 Payroll recalculated after shift edit. New total: £${payroll.netPay}`);
       }
@@ -444,10 +456,7 @@ export const updateShift = asyncHandler(async (req, res) => {
   }
 
   // Send notification if date or time changed
-  const hasChanges = 
-    (date && new Date(date).toDateString() !== new Date(originalShift.date).toDateString()) ||
-    (startTime && startTime !== originalShift.startTime) ||
-    (endTime && endTime !== originalShift.endTime);
+  const hasChanges = dateChanged || timeChanged || statusChanged;
 
   if (hasChanges && updatedShift.employee) {
     try {

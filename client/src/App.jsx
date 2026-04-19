@@ -15,6 +15,7 @@ import {
   ProfilePage as ManagerProfilePage,
   AvailabilityPage as ManagerAvailabilityPage,
   AnnouncementsPage,
+  ReportsPage,
 } from './pages/manager';
 
 // Employee Pages
@@ -194,6 +195,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['manager']}>
             <AnnouncementsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager/reports"
+        element={
+          <ProtectedRoute allowedRoles={['manager']}>
+            <ReportsPage />
           </ProtectedRoute>
         }
       />

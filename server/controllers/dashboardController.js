@@ -1,4 +1,4 @@
-import { User, Shift, Payroll, Notification } from '../models/index.js';
+import { User, Shift, Payroll, Notification, Announcement } from '../models/index.js';
 import { asyncHandler, getWeekBoundaries, calculateShiftStatus } from '../utils/helpers.js';
 
 /**
@@ -23,6 +23,7 @@ export const getManagerDashboard = asyncHandler(async (req, res) => {
     pendingPayrolls,
     recentPayrolls,
     recentNotifications,
+    recentAnnouncements,
   ] = await Promise.all([
     // Employee statistics
     User.aggregate([
@@ -71,6 +72,16 @@ export const getManagerDashboard = asyncHandler(async (req, res) => {
 
     Notification.find({ recipient: req.user._id })
       .sort({ createdAt: -1 })
+      .limit(5),
+
+    Announcement.find({
+      audience: { $in: ['all', 'manager'] },
+      isActive: true,
+      startAt: { $lte: new Date() },
+      $or: [{ endAt: null }, { endAt: { $gte: new Date() } }],
+    })
+      .populate('createdBy', 'name role')
+      .sort({ isPinned: -1, priority: -1, createdAt: -1 })
       .limit(5),
   ]);
 
@@ -178,6 +189,7 @@ export const getManagerDashboard = asyncHandler(async (req, res) => {
         recent: recentPayrolls,
       },
       recentNotifications,
+      recentAnnouncements,
       analytics: {
         attendanceRate,
         utilizationRate,

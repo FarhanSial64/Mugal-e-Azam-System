@@ -137,9 +137,13 @@ export const calculatePayroll = asyncHandler(async (req, res) => {
   // Get employees to process
   let employees;
   if (employeeId) {
-    const employee = await User.findById(employeeId);
+    const employee = await User.findOne({
+      _id: employeeId,
+      role: 'employee',
+      isActive: true,
+    });
     if (!employee) {
-      throw new ApiError('Employee not found', 404);
+      throw new ApiError('Employee not found or inactive', 404);
     }
     employees = [employee];
   } else {
