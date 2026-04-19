@@ -1,0 +1,8 @@
+export { default as ManagerDashboard } from './Dashboard';
+export { default as EmployeesPage } from './Employees';
+export { default as ShiftsPage } from './Shifts';
+export { default as BulkShiftsPage } from './BulkShifts';
+export { default as PayrollPage } from './Payroll';
+export { default as ProfilePage } from './Profile';
+export { default as AvailabilityPage } from './Availability';
+export { default as AnnouncementsPage } from './Announcements';
