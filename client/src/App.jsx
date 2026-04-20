@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { Spinner } from './components/common';
-import { DebugPanel } from './utils/debug';
 
 // Auth Pages
 import { LoginPage, SignupPage } from './pages/auth';
@@ -112,8 +111,7 @@ const HomeRedirect = () => {
 
 function App() {
   return (
-    <>
-      <Routes>
+    <Routes>
       {/* Home Route */}
       <Route path="/" element={<HomeRedirect />} />
 
@@ -269,9 +267,7 @@ function App() {
           </div>
         }
       />
-      </Routes>
-      <DebugPanel />
-    </>
+    </Routes>
   );
 }
 
