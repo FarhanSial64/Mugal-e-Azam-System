@@ -112,7 +112,8 @@ const HomeRedirect = () => {
 
 function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       {/* Home Route */}
       <Route path="/" element={<HomeRedirect />} />
 
@@ -268,8 +269,9 @@ function App() {
           </div>
         }
       />
-    </Routes>
-    <DebugPanel />
+      </Routes>
+      <DebugPanel />
+    </>
   );
 }
 
