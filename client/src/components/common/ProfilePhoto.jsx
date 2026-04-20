@@ -1,8 +1,6 @@
 import { useState, useRef } from 'react';
 import { CameraIcon, TrashIcon, UserCircleIcon } from '@heroicons/react/24/outline';
-
-// Base URL for static files (without /api)
-const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+import { getApiOrigin } from '../../services/api';
 
 const ProfilePhoto = ({ 
   photoUrl, 
@@ -31,7 +29,7 @@ const ProfilePhoto = ({
     if (!photoUrl) return null;
     // If it's a relative URL, prepend BASE URL
     if (photoUrl.startsWith('/')) {
-      return `${BASE_URL}${photoUrl}`;
+      return `${getApiOrigin()}${photoUrl}`;
     }
     return photoUrl;
   };

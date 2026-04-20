@@ -2,6 +2,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const defaultClientUrls = ['http://localhost:5173', 'https://mugal-e-azam-system-dduc.vercel.app'];
+const parsedClientUrls = (process.env.CLIENT_URLS || '')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+
 const config = {
   // Server
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -34,6 +40,11 @@ const config = {
 
   // Client URL
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrls: parsedClientUrls.length
+    ? parsedClientUrls
+    : process.env.CLIENT_URL
+      ? [process.env.CLIENT_URL]
+      : defaultClientUrls,
 };
 
 export default config;

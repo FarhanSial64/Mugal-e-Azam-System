@@ -1,10 +1,22 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const LOCAL_API_URL = import.meta.env.VITE_API_URL || '/api';
+const REMOTE_API_URL = import.meta.env.VITE_API_URL_FALLBACK || '';
+
+const isLocalHost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const DEFAULT_API_URL = !isLocalHost && REMOTE_API_URL ? REMOTE_API_URL : LOCAL_API_URL;
+
+let activeApiBaseURL = DEFAULT_API_URL;
+
+export const getApiBaseUrl = () => activeApiBaseURL;
+export const getApiOrigin = () => activeApiBaseURL.replace(/\/api\/?$/, '');
 
 // Create axios instance
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: activeApiBaseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,8 +38,29 @@ api.interceptors.request.use(
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response?.config?.baseURL) {
+      activeApiBaseURL = response.config.baseURL;
+    }
+    return response;
+  },
   (error) => {
+    const originalRequest = error.config;
+
+    // If local API is unavailable, retry once against remote fallback.
+    if (
+      originalRequest &&
+      !error.response &&
+      REMOTE_API_URL &&
+      originalRequest.baseURL !== REMOTE_API_URL &&
+      !originalRequest.__retryWithFallback
+    ) {
+      originalRequest.__retryWithFallback = true;
+      originalRequest.baseURL = REMOTE_API_URL;
+      activeApiBaseURL = REMOTE_API_URL;
+      return api(originalRequest);
+    }
+
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('token');
