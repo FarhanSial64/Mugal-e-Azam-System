@@ -1,6 +1,7 @@
 import { sendEmail, emailTemplates } from './email.js';
 import { sendSMS, smsTemplates } from './sms.js';
 import { Notification } from '../models/index.js';
+import config from '../config/env.js';
 
 /**
  * Send notification through multiple channels
@@ -216,6 +217,43 @@ export const notifyAccountCreated = async (user, tempPassword) => {
     type: 'account_created',
     title: 'Welcome to Mugal e Azam',
     message: 'Your employee account has been created. Check your email for login details.',
+    emailOptions: emailContent,
+    relatedModel: 'User',
+    relatedId: normalizedUser._id,
+  });
+};
+
+/**
+ * Notify employee about password reset
+ */
+export const notifyPasswordReset = async (user, tempPassword) => {
+  const normalizedUser = user?.toObject ? user.toObject() : user;
+  const preferredClientUrl =
+    config.clientUrls.find((url) => !url.includes('localhost') && !url.includes('127.0.0.1')) ||
+    config.clientUrl ||
+    config.clientUrls[0] ||
+    'http://localhost:5173';
+  const loginUrl = `${preferredClientUrl.replace(/\/$/, '')}/login`;
+
+  const emailContent = emailTemplates.passwordReset(
+    normalizedUser.name,
+    normalizedUser.email,
+    tempPassword,
+    loginUrl
+  );
+
+  return sendNotification({
+    userId: normalizedUser._id,
+    user: {
+      _id: normalizedUser._id,
+      name: normalizedUser.name,
+      email: normalizedUser.email,
+      phone: normalizedUser.phone,
+      notificationPreferences: { email: true, sms: false },
+    },
+    type: 'password_reset',
+    title: 'Password Reset',
+    message: 'Your password has been reset. Check your email for updated login credentials.',
     emailOptions: emailContent,
     relatedModel: 'User',
     relatedId: normalizedUser._id,

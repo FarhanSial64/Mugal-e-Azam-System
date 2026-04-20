@@ -232,6 +232,30 @@ export const emailTemplates = {
     `,
   }),
 
+  passwordReset: (employeeName, email, tempPassword, loginUrl) => ({
+    subject: 'Password Reset - Mugal e Azam Account',
+    text: `Hi ${employeeName},\n\nYour password has been reset by management.\n\nUpdated login details:\nEmail: ${email}\nTemporary Password: ${tempPassword}\nLogin: ${loginUrl}\n\nPlease log in and change your password immediately.\n\nBest regards,\nMugal e Azam Management`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Mugal e Azam</h1>
+        </div>
+        <div style="padding: 30px; background: #f9f9f9;">
+          <h2 style="color: #333;">Password Reset Successful</h2>
+          <p>Hi <strong>${employeeName}</strong>,</p>
+          <p>Your password has been reset by management. Please use the credentials below to sign in:</p>
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f39c12;">
+            <p style="margin: 5px 0;"><strong>📧 Email:</strong> ${email}</p>
+            <p style="margin: 5px 0;"><strong>🔑 Temporary Password:</strong> ${tempPassword}</p>
+            <p style="margin: 10px 0 0 0;"><strong>🔗 Login:</strong> <a href="${loginUrl}" target="_blank" rel="noopener noreferrer">${loginUrl}</a></p>
+          </div>
+          <p style="color: #e74c3c;"><strong>Important:</strong> Please log in and change your password immediately for security.</p>
+          <p style="color: #666; margin-top: 30px;">Best regards,<br/>Mugal e Azam Management</p>
+        </div>
+      </div>
+    `,
+  }),
+
   shiftCancelled: (employeeName, shiftDate, startTime, endTime, reason = '') => ({
     subject: '⚠️ Shift Cancelled - Mugal e Azam',
     text: `Hi ${employeeName},\n\nYour shift on ${shiftDate} from ${startTime} - ${endTime} has been cancelled.${reason ? `\n\nReason: ${reason}` : ''}\n\nPlease contact management if you have any questions.\n\nBest regards,\nMugal e Azam Management`,

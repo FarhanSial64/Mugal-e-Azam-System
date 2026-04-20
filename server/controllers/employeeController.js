@@ -1,6 +1,6 @@
 import { User } from '../models/index.js';
 import { ApiError, asyncHandler, generatePassword } from '../utils/helpers.js';
-import { notifyAccountCreated } from '../utils/notifications.js';
+import { notifyAccountCreated, notifyPasswordReset } from '../utils/notifications.js';
 
 /**
  * @desc    Get all employees
@@ -249,7 +249,7 @@ export const resetEmployeePassword = asyncHandler(async (req, res) => {
 
   // Send new credentials via email
   try {
-    await notifyAccountCreated(employee, newPassword);
+    await notifyPasswordReset(employee, newPassword);
   } catch (error) {
     console.error('Failed to send password reset email:', error.message);
   }
