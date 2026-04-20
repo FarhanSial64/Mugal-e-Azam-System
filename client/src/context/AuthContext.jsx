@@ -45,16 +45,24 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true);
+      console.log('🔐 Login attempt for:', email);
       const response = await authAPI.login({ email, password });
+      console.log('✅ Login response:', response.data);
       const { data, token } = response.data;
+
+      if (!data || !token) {
+        throw new Error('Invalid response structure: missing data or token');
+      }
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(data));
       setUser(data);
+      console.log('✅ User set to:', data);
 
       toast.success(`Welcome back, ${data.name}!`);
 
       // Redirect based on role
+      console.log('🔀 Redirecting to dashboard for role:', data.role);
       if (data.role === 'manager') {
         navigate('/manager/dashboard');
       } else {
@@ -63,7 +71,10 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.error || 'Login failed';
+      console.error('❌ Login error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      const message = error.response?.data?.error || error.message || 'Login failed';
       toast.error(message);
       return { success: false, error: message };
     } finally {
