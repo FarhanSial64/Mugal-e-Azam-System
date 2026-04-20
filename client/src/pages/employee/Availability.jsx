@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { availabilityAPI } from '../../services/api';
 import { DashboardLayout } from '../../components/layout';
-import { Card, Button, Spinner } from '../../components/common';
+import { Card, Button, Spinner, StatCard, Badge } from '../../components/common';
 import {
   CalendarDaysIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CheckCircleIcon,
   XCircleIcon,
+  SparklesIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { format, addWeeks, subWeeks, startOfWeek } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -20,6 +22,14 @@ const defaultDayAvailability = {
   startTime: '09:00',
   endTime: '23:00',
   notes: '',
+};
+
+const formatTime = (time) => {
+  if (!time) return '-';
+  const [hours, minutes] = time.split(':').map(Number);
+  const suffix = hours >= 12 ? 'PM' : 'AM';
+  const normalizedHours = hours % 12 || 12;
+  return `${normalizedHours}:${String(minutes).padStart(2, '0')} ${suffix}`;
 };
 
 const EmployeeAvailabilityPage = () => {
@@ -120,6 +130,18 @@ const EmployeeAvailabilityPage = () => {
     setAvailability(newAvailability);
   };
 
+  const availableDays = dayNames.filter((day) => availability[day]?.isAvailable).length;
+  const unavailableDays = dayNames.length - availableDays;
+  const availableWindows = dayNames
+    .map((day) => availability[day])
+    .filter((day) => day?.isAvailable);
+  const earliestStart = availableWindows.length
+    ? availableWindows.reduce((min, day) => (day.startTime < min ? day.startTime : min), availableWindows[0].startTime)
+    : null;
+  const latestEnd = availableWindows.length
+    ? availableWindows.reduce((max, day) => (day.endTime > max ? day.endTime : max), availableWindows[0].endTime)
+    : null;
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -133,31 +155,66 @@ const EmployeeAvailabilityPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fadeIn">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Availability</h1>
-            <p className="text-gray-500 mt-1">
-              Set your availability for each week so managers know when you can work
-            </p>
+        <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-primary-700 via-primary-600 to-slate-900 p-6 text-white shadow-lg shadow-primary-900/10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">
+                <SparklesIcon className="h-4 w-4" />
+                Availability planner
+              </div>
+              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">My Availability</h1>
+              <p className="mt-3 max-w-2xl text-sm text-slate-200 sm:text-base">
+                Keep your weekly schedule accurate so shifts are assigned within your preferred hours.
+              </p>
+              <p className="mt-4 text-xs uppercase tracking-[0.18em] text-slate-300">
+                Week starting {format(currentWeek, 'EEEE, dd MMMM yyyy')}
+              </p>
+            </div>
+            <Button onClick={handleSave} isLoading={saving} className="bg-white text-slate-900 hover:bg-slate-100 font-semibold">
+              Save Changes
+            </Button>
           </div>
-          <Button onClick={handleSave} loading={saving}>
-            Save Changes
-          </Button>
-        </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard
+            title="Available Days"
+            value={availableDays}
+            subtitle="This selected week"
+            icon={CheckCircleIcon}
+          />
+          <StatCard
+            title="Unavailable Days"
+            value={unavailableDays}
+            subtitle="Marked as off"
+            icon={XCircleIcon}
+          />
+          <StatCard
+            title="Earliest Start"
+            value={formatTime(earliestStart)}
+            subtitle="Among available days"
+            icon={ClockIcon}
+          />
+          <StatCard
+            title="Latest End"
+            value={formatTime(latestEnd)}
+            subtitle="Among available days"
+            icon={ClockIcon}
+          />
+        </section>
 
         {/* Week Navigation */}
-        <Card>
+        <Card title="Week Navigator" subtitle="Move across weeks and update when your routine changes">
           <div className="flex items-center justify-between">
             <button
               onClick={handlePrevWeek}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
             >
-              <ChevronLeftIcon className="h-5 w-5" />
+              <ChevronLeftIcon className="h-5 w-5 text-slate-600" />
             </button>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 text-slate-900">
               <CalendarDaysIcon className="h-5 w-5 text-primary-600" />
-              <span className="font-medium">
+              <span className="font-semibold">
                 Week of {format(currentWeek, 'MMMM d, yyyy')}
               </span>
               <Button variant="outline" size="sm" onClick={handleThisWeek}>
@@ -166,22 +223,24 @@ const EmployeeAvailabilityPage = () => {
             </div>
             <button
               onClick={handleNextWeek}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
             >
-              <ChevronRightIcon className="h-5 w-5" />
+              <ChevronRightIcon className="h-5 w-5 text-slate-600" />
             </button>
           </div>
         </Card>
 
         {/* Quick Actions */}
-        <div className="flex gap-3">
-          <Button variant="outline" size="sm" onClick={setAllAvailable}>
-            Mark All Available
-          </Button>
-          <Button variant="outline" size="sm" onClick={setAllUnavailable}>
-            Mark All Unavailable
-          </Button>
-        </div>
+        <Card title="Quick Actions" subtitle="Apply weekly defaults with one click">
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" size="sm" onClick={setAllAvailable}>
+              Mark All Available
+            </Button>
+            <Button variant="outline" size="sm" onClick={setAllUnavailable}>
+              Mark All Unavailable
+            </Button>
+          </div>
+        </Card>
 
         {/* Availability Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -190,56 +249,54 @@ const EmployeeAvailabilityPage = () => {
               <div
                 className={`p-4 cursor-pointer transition-colors ${
                   availability[day].isAvailable
-                    ? 'bg-green-50 border-b border-green-100'
-                    : 'bg-red-50 border-b border-red-100'
+                    ? 'bg-emerald-50 border-b border-emerald-100'
+                    : 'bg-rose-50 border-b border-rose-100'
                 }`}
                 onClick={() => toggleDayAvailability(day)}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">{dayLabels[index]}</h3>
+                  <h3 className="font-semibold text-slate-900">{dayLabels[index]}</h3>
                   {availability[day].isAvailable ? (
-                    <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                    <CheckCircleIcon className="h-6 w-6 text-emerald-600" />
                   ) : (
-                    <XCircleIcon className="h-6 w-6 text-red-600" />
+                    <XCircleIcon className="h-6 w-6 text-rose-600" />
                   )}
                 </div>
-                <p
-                  className={`text-sm mt-1 ${
-                    availability[day].isAvailable ? 'text-green-700' : 'text-red-700'
-                  }`}
-                >
-                  {availability[day].isAvailable ? 'Available' : 'Not Available'}
-                </p>
+                <div className="mt-2">
+                  <Badge variant={availability[day].isAvailable ? 'success' : 'danger'}>
+                    {availability[day].isAvailable ? 'Available' : 'Not Available'}
+                  </Badge>
+                </div>
               </div>
 
               {availability[day].isAvailable && (
                 <div className="p-4 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-medium text-slate-600 mb-1">
                         From
                       </label>
                       <input
                         type="time"
                         value={availability[day].startTime}
                         onChange={(e) => updateDayField(day, 'startTime', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-medium text-slate-600 mb-1">
                         Until
                       </label>
                       <input
                         type="time"
                         value={availability[day].endTime}
                         onChange={(e) => updateDayField(day, 'endTime', e.target.value)}
-                        className="w-full px-2 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
                       Notes (optional)
                     </label>
                     <input
@@ -247,7 +304,7 @@ const EmployeeAvailabilityPage = () => {
                       placeholder="e.g., After 6pm only"
                       value={availability[day].notes}
                       onChange={(e) => updateDayField(day, 'notes', e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                   </div>
                 </div>
@@ -257,14 +314,13 @@ const EmployeeAvailabilityPage = () => {
         </div>
 
         {/* Info Box */}
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-sky-50 border-sky-200" title="How Availability Works" subtitle="These settings guide shift assignment decisions">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <CalendarDaysIcon className="h-6 w-6 text-blue-600" />
+              <CalendarDaysIcon className="h-6 w-6 text-sky-600" />
             </div>
             <div>
-              <h4 className="font-medium text-blue-900">How it works</h4>
-              <ul className="mt-2 text-sm text-blue-800 space-y-1">
+              <ul className="text-sm text-sky-800 space-y-1">
                 <li>• Click on a day to toggle availability on/off</li>
                 <li>• Set your available hours for each day</li>
                 <li>• Managers will see your availability when scheduling shifts</li>

@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
 import { DashboardLayout } from '../../components/layout';
-import { Card, Button, Input, ProfilePhoto } from '../../components/common';
+import { Card, Button, Input, ProfilePhoto, StatCard } from '../../components/common';
 import {
   UserCircleIcon,
   EnvelopeIcon,
   PhoneIcon,
   KeyIcon,
+  SparklesIcon,
+  BellIcon,
+  ShieldCheckIcon,
+  CurrencyPoundIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -30,6 +34,8 @@ const EmployeeProfilePage = () => {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const enabledNotificationCount = [notifications.email, notifications.sms].filter(Boolean).length;
 
   useEffect(() => {
     if (user) {
@@ -134,17 +140,56 @@ const EmployeeProfilePage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-500 mt-1">View and update your personal information</p>
-        </div>
+      <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
+        <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-primary-700 via-primary-600 to-slate-900 p-6 text-white shadow-lg shadow-primary-900/10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">
+                <SparklesIcon className="h-4 w-4" />
+                Profile hub
+              </div>
+              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">My Profile</h1>
+              <p className="mt-3 max-w-2xl text-sm text-slate-200 sm:text-base">
+                Keep your personal details, contact preferences, and account security settings up to date.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-slate-100">
+              Account role: {user?.jobRole?.replace('-', ' ') || 'Employee'}
+            </div>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard
+            title="Account Status"
+            value={user?.isActive ? 'Active' : 'Inactive'}
+            subtitle="Current access state"
+            icon={ShieldCheckIcon}
+          />
+          <StatCard
+            title="Hourly Wage"
+            value={`£${user?.hourlyWage || 0}/hr`}
+            subtitle="Configured pay rate"
+            icon={CurrencyPoundIcon}
+          />
+          <StatCard
+            title="Notifications"
+            value={`${enabledNotificationCount}/2`}
+            subtitle="Channels enabled"
+            icon={BellIcon}
+          />
+          <StatCard
+            title="Profile Completeness"
+            value={profileData.address ? 'Complete' : 'Needs Address'}
+            subtitle="Based on saved details"
+            icon={UserCircleIcon}
+          />
+        </section>
 
         {/* Profile Card */}
-        <Card title="Personal Information">
+        <Card title="Personal Information" subtitle="Update your basic account and contact details">
           <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center space-x-4 mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <ProfilePhoto
                 photoUrl={user?.profilePhoto}
                 name={user?.name}
@@ -155,10 +200,10 @@ const EmployeeProfilePage = () => {
                 uploading={uploadingPhoto}
               />
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">{user?.name}</h3>
-                <p className="text-gray-500 capitalize">{user?.jobRole?.replace('-', ' ')}</p>
-                <p className="text-sm text-gray-400">{user?.email}</p>
-                <p className="text-xs text-gray-400 mt-1">Click the camera to upload a photo</p>
+                <h3 className="text-xl font-semibold text-slate-900">{user?.name}</h3>
+                <p className="text-slate-500 capitalize">{user?.jobRole?.replace('-', ' ')}</p>
+                <p className="text-sm text-slate-400">{user?.email}</p>
+                <p className="text-xs text-slate-400 mt-1">Click the camera to upload a photo</p>
               </div>
             </div>
 
@@ -219,14 +264,14 @@ const EmployeeProfilePage = () => {
         </Card>
 
         {/* Notification Preferences */}
-        <Card title="Notification Preferences">
+        <Card title="Notification Preferences" subtitle="Choose how you want to receive schedule and payroll updates">
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
               <div className="flex items-center space-x-3">
-                <EnvelopeIcon className="h-6 w-6 text-gray-500" />
+                <EnvelopeIcon className="h-6 w-6 text-slate-500" />
                 <div>
-                  <p className="font-medium text-gray-900">Email Notifications</p>
-                  <p className="text-sm text-gray-500">Get shift assignments and payroll updates via email</p>
+                  <p className="font-medium text-slate-900">Email Notifications</p>
+                  <p className="text-sm text-slate-500">Get shift assignments and payroll updates via email</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -240,12 +285,12 @@ const EmployeeProfilePage = () => {
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
               <div className="flex items-center space-x-3">
-                <PhoneIcon className="h-6 w-6 text-gray-500" />
+                <PhoneIcon className="h-6 w-6 text-slate-500" />
                 <div>
-                  <p className="font-medium text-gray-900">SMS Notifications</p>
-                  <p className="text-sm text-gray-500">Get important alerts via text message</p>
+                  <p className="font-medium text-slate-900">SMS Notifications</p>
+                  <p className="text-sm text-slate-500">Get important alerts via text message</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -262,7 +307,7 @@ const EmployeeProfilePage = () => {
         </Card>
 
         {/* Change Password */}
-        <Card title="Change Password">
+        <Card title="Change Password" subtitle="Use a strong password and update it regularly">
           <form onSubmit={handleChangePassword} className="space-y-4">
             <Input
               label="Current Password"
