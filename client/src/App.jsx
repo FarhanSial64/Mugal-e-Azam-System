@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { Spinner } from './components/common';
@@ -15,7 +16,6 @@ import {
   ProfilePage as ManagerProfilePage,
   AvailabilityPage as ManagerAvailabilityPage,
   AnnouncementsPage,
-  ReportsPage,
 } from './pages/manager';
 
 // Employee Pages
@@ -26,6 +26,14 @@ import {
   EmployeeProfilePage,
   EmployeeAvailabilityPage,
 } from './pages/employee';
+
+const ReportsPage = lazy(() =>
+  import('./pages/manager').then((module) => ({ default: module.ReportsPage }))
+);
+
+const EmployeeReportsPage = lazy(() =>
+  import('./pages/employee').then((module) => ({ default: module.EmployeeReportsPage }))
+);
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -111,7 +119,17 @@ const HomeRedirect = () => {
 
 function App() {
   return (
-    <Routes>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <Spinner size="lg" />
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <Routes>
       {/* Home Route */}
       <Route path="/" element={<HomeRedirect />} />
 
@@ -233,6 +251,14 @@ function App() {
         }
       />
       <Route
+        path="/employee/reports"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <EmployeeReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/employee/profile"
         element={
           <ProtectedRoute allowedRoles={['employee']}>
@@ -267,7 +293,8 @@ function App() {
           </div>
         }
       />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 

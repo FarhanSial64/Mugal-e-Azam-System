@@ -8,6 +8,7 @@ import {
   UsersIcon,
   CalendarDaysIcon,
   BanknotesIcon,
+  ChartBarIcon,
   BellIcon,
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
@@ -39,6 +40,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'My Shifts', href: '/employee/shifts', icon: CalendarDaysIcon },
     { name: 'My Availability', href: '/employee/availability', icon: ClockIcon },
     { name: 'My Payroll', href: '/employee/payroll', icon: BanknotesIcon },
+    { name: 'My Reports', href: '/employee/reports', icon: ChartBarIcon },
   ];
 
   const navItems = isManager ? managerNavItems : employeeNavItems;

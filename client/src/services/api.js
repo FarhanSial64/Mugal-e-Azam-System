@@ -148,6 +148,7 @@ export const announcementAPI = {
 export const dashboardAPI = {
   getManager: () => api.get('/dashboard/manager'),
   getEmployee: () => api.get('/dashboard/employee'),
+  getEmployeeReports: (params) => api.get('/dashboard/employee/reports', { params }),
 };
 
 // Availability API

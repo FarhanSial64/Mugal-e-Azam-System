@@ -1,6 +1,63 @@
 import { User, Shift, Payroll, Notification, Announcement } from '../models/index.js';
 import { asyncHandler, getWeekBoundaries, calculateShiftStatus } from '../utils/helpers.js';
 
+const getReportDateRange = (period, startDateInput, endDateInput) => {
+  const now = new Date();
+  const endDate = new Date(now);
+  endDate.setHours(23, 59, 59, 999);
+
+  if (period === 'custom') {
+    const parsedStart = startDateInput ? new Date(startDateInput) : null;
+    const parsedEnd = endDateInput ? new Date(endDateInput) : null;
+
+    if (parsedStart && !Number.isNaN(parsedStart.getTime())) {
+      parsedStart.setHours(0, 0, 0, 0);
+    }
+    if (parsedEnd && !Number.isNaN(parsedEnd.getTime())) {
+      parsedEnd.setHours(23, 59, 59, 999);
+    }
+
+    if (
+      parsedStart &&
+      parsedEnd &&
+      !Number.isNaN(parsedStart.getTime()) &&
+      !Number.isNaN(parsedEnd.getTime()) &&
+      parsedStart <= parsedEnd
+    ) {
+      return { startDate: parsedStart, endDate: parsedEnd };
+    }
+  }
+
+  const startDate = new Date(now);
+
+  if (period === 'weekly') {
+    startDate.setDate(now.getDate() - 55);
+  } else {
+    // Default monthly range: last 12 months
+    startDate.setMonth(now.getMonth() - 11);
+  }
+
+  startDate.setHours(0, 0, 0, 0);
+  return { startDate, endDate };
+};
+
+const toWeekKey = (date) => {
+  const { weekStart } = getWeekBoundaries(date);
+  return weekStart.toISOString().split('T')[0];
+};
+
+const toMonthKey = (date) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+};
+
+const calculateShiftEarning = (shift, hourlyRate) => {
+  const shiftHours = shift.hoursWorked || 0;
+  const overtimeHours = Math.max(0, shift.overtimeHours || 0);
+  const regularHours = Math.max(0, shiftHours - overtimeHours);
+  return (regularHours * hourlyRate) + (overtimeHours * hourlyRate * 1.5);
+};
+
 /**
  * @desc    Get dashboard statistics for manager
  * @route   GET /api/dashboard/manager
@@ -351,7 +408,211 @@ export const getEmployeeDashboard = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Get employee reporting analytics
+ * @route   GET /api/dashboard/employee/reports
+ * @access  Private/Employee
+ */
+export const getEmployeeReports = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const period = req.query.period || 'monthly';
+  const { startDate, endDate } = getReportDateRange(
+    period,
+    req.query.startDate,
+    req.query.endDate
+  );
+
+  const hourlyRate = req.user.hourlyWage || req.user.hourlyRate || 0;
+
+  const [shifts, payrolls] = await Promise.all([
+    Shift.find({
+      employee: userId,
+      date: { $gte: startDate, $lte: endDate },
+      status: { $ne: 'cancelled' },
+    }).select('date startTime status hoursWorked overtimeHours shiftType'),
+    Payroll.find({
+      employee: userId,
+      weekStartDate: { $gte: startDate, $lte: endDate },
+    })
+      .sort({ weekStartDate: -1 })
+      .select('weekStartDate weekEndDate totalHours overtimeHours netPay status shifts'),
+  ]);
+
+  const completedShifts = shifts.filter((shift) => shift.status === 'completed');
+  const missedShifts = shifts.filter((shift) => shift.status === 'missed');
+  const attendancePool = shifts.filter((shift) => ['completed', 'missed'].includes(shift.status));
+
+  const processedShiftIds = new Set(
+    payrolls.flatMap((payroll) => (payroll.shifts || []).map((id) => id.toString()))
+  );
+
+  const estimatedUnprocessedEarnings = completedShifts
+    .filter((shift) => !processedShiftIds.has(shift._id.toString()))
+    .reduce((sum, shift) => sum + calculateShiftEarning(shift, hourlyRate), 0);
+
+  const totalHoursWorked = completedShifts.reduce((sum, shift) => sum + (shift.hoursWorked || 0), 0);
+  const totalOvertimeHours = completedShifts.reduce((sum, shift) => sum + (shift.overtimeHours || 0), 0);
+
+  const paidEarnings = payrolls
+    .filter((payroll) => payroll.status === 'paid')
+    .reduce((sum, payroll) => sum + (payroll.netPay || 0), 0);
+
+  const pendingPayrollEarnings = payrolls
+    .filter((payroll) => payroll.status !== 'paid')
+    .reduce((sum, payroll) => sum + (payroll.netPay || 0), 0);
+
+  const totalTrackedEarnings = paidEarnings + pendingPayrollEarnings + estimatedUnprocessedEarnings;
+
+  const attendanceRate = attendancePool.length > 0
+    ? ((completedShifts.length / attendancePool.length) * 100)
+    : 0;
+
+  const weeklyBuckets = {};
+  const monthlyBuckets = {};
+  const hourlyBuckets = {};
+
+  completedShifts.forEach((shift) => {
+    const weekKey = toWeekKey(shift.date);
+    const monthKey = toMonthKey(shift.date);
+    const startHour = Number((shift.startTime || '0:00').split(':')[0]);
+    const safeHour = Number.isNaN(startHour) ? 0 : startHour;
+    const shiftHours = shift.hoursWorked || 0;
+    const shiftEarning = calculateShiftEarning(shift, hourlyRate);
+
+    if (!weeklyBuckets[weekKey]) {
+      weeklyBuckets[weekKey] = {
+        period: weekKey,
+        hours: 0,
+        earnings: 0,
+        completedShifts: 0,
+        missedShifts: 0,
+      };
+    }
+
+    if (!monthlyBuckets[monthKey]) {
+      monthlyBuckets[monthKey] = {
+        period: monthKey,
+        hours: 0,
+        earnings: 0,
+        completedShifts: 0,
+      };
+    }
+
+    if (!hourlyBuckets[safeHour]) {
+      hourlyBuckets[safeHour] = {
+        hour: safeHour,
+        label: `${String(safeHour).padStart(2, '0')}:00`,
+        hours: 0,
+        earnings: 0,
+        shifts: 0,
+      };
+    }
+
+    weeklyBuckets[weekKey].hours += shiftHours;
+    weeklyBuckets[weekKey].earnings += shiftEarning;
+    weeklyBuckets[weekKey].completedShifts += 1;
+
+    monthlyBuckets[monthKey].hours += shiftHours;
+    monthlyBuckets[monthKey].earnings += shiftEarning;
+    monthlyBuckets[monthKey].completedShifts += 1;
+
+    hourlyBuckets[safeHour].hours += shiftHours;
+    hourlyBuckets[safeHour].earnings += shiftEarning;
+    hourlyBuckets[safeHour].shifts += 1;
+  });
+
+  missedShifts.forEach((shift) => {
+    const weekKey = toWeekKey(shift.date);
+    if (!weeklyBuckets[weekKey]) {
+      weeklyBuckets[weekKey] = {
+        period: weekKey,
+        hours: 0,
+        earnings: 0,
+        completedShifts: 0,
+        missedShifts: 0,
+      };
+    }
+    weeklyBuckets[weekKey].missedShifts += 1;
+  });
+
+  const weeklyTrend = Object.values(weeklyBuckets)
+    .sort((a, b) => new Date(a.period) - new Date(b.period))
+    .map((entry) => ({
+      ...entry,
+      hours: parseFloat(entry.hours.toFixed(2)),
+      earnings: parseFloat(entry.earnings.toFixed(2)),
+    }));
+
+  const monthlyTrend = Object.values(monthlyBuckets)
+    .sort((a, b) => a.period.localeCompare(b.period))
+    .map((entry) => ({
+      ...entry,
+      hours: parseFloat(entry.hours.toFixed(2)),
+      earnings: parseFloat(entry.earnings.toFixed(2)),
+    }));
+
+  const hourlyBreakdown = Object.values(hourlyBuckets)
+    .sort((a, b) => a.hour - b.hour)
+    .map((entry) => ({
+      ...entry,
+      hours: parseFloat(entry.hours.toFixed(2)),
+      earnings: parseFloat(entry.earnings.toFixed(2)),
+    }));
+
+  const payrollStatusTotals = payrolls.reduce((acc, payroll) => {
+    const status = payroll.status || 'pending';
+    if (!acc[status]) {
+      acc[status] = { status, count: 0, amount: 0 };
+    }
+    acc[status].count += 1;
+    acc[status].amount += payroll.netPay || 0;
+    return acc;
+  }, {});
+
+  const payrollStatusBreakdown = Object.values(payrollStatusTotals).map((entry) => ({
+    ...entry,
+    amount: parseFloat(entry.amount.toFixed(2)),
+  }));
+
+  res.status(200).json({
+    success: true,
+    data: {
+      filters: {
+        period,
+        startDate,
+        endDate,
+      },
+      summary: {
+        totalShifts: shifts.length,
+        completedShifts: completedShifts.length,
+        missedShifts: missedShifts.length,
+        totalHoursWorked: parseFloat(totalHoursWorked.toFixed(2)),
+        totalOvertimeHours: parseFloat(totalOvertimeHours.toFixed(2)),
+        attendanceRate: parseFloat(attendanceRate.toFixed(1)),
+        averageHoursPerShift: completedShifts.length > 0
+          ? parseFloat((totalHoursWorked / completedShifts.length).toFixed(2))
+          : 0,
+        averageEarningsPerHour: totalHoursWorked > 0
+          ? parseFloat((totalTrackedEarnings / totalHoursWorked).toFixed(2))
+          : 0,
+      },
+      earnings: {
+        paid: parseFloat(paidEarnings.toFixed(2)),
+        pendingPayroll: parseFloat(pendingPayrollEarnings.toFixed(2)),
+        estimatedFromCompletedShifts: parseFloat(estimatedUnprocessedEarnings.toFixed(2)),
+        totalTracked: parseFloat(totalTrackedEarnings.toFixed(2)),
+      },
+      weeklyTrend,
+      monthlyTrend,
+      hourlyBreakdown,
+      payrollStatusBreakdown,
+      recentPayrolls: payrolls.slice(0, 8),
+    },
+  });
+});
+
 export default {
   getManagerDashboard,
   getEmployeeDashboard,
+  getEmployeeReports,
 };
