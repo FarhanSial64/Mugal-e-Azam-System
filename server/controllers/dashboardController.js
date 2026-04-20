@@ -220,7 +220,7 @@ export const getEmployeeDashboard = asyncHandler(async (req, res) => {
   today.setHours(0, 0, 0, 0);
 
   // Parallel queries
-  const [upcomingShifts, weeklyShifts, recentPayrolls, todayShift] = await Promise.all([
+  const [upcomingShifts, weeklyShifts, recentPayrolls, allPayrolls, todayShift] = await Promise.all([
     // Upcoming shifts
     Shift.find({
       employee: userId,
@@ -241,6 +241,9 @@ export const getEmployeeDashboard = asyncHandler(async (req, res) => {
     Payroll.find({ employee: userId })
       .sort({ weekStartDate: -1 })
       .limit(4),
+
+    // All payrolls for accurate earnings and processed-shift tracking
+    Payroll.find({ employee: userId }).select('status netPay shifts'),
 
     // Today's shift
     Shift.findOne({
@@ -279,14 +282,34 @@ export const getEmployeeDashboard = asyncHandler(async (req, res) => {
   // Calculate weekly hours
   const weeklyHours = weeklyShifts.reduce((sum, s) => sum + (s.hoursWorked || 0), 0);
 
-  // Calculate earnings
-  const totalPaid = recentPayrolls
+  // Calculate earnings using full payroll history (not only recent records)
+  const totalPaid = allPayrolls
     .filter((p) => p.status === 'paid')
     .reduce((sum, p) => sum + p.netPay, 0);
 
-  const totalPending = recentPayrolls
+  const pendingFromPayrolls = allPayrolls
     .filter((p) => p.status !== 'paid')
     .reduce((sum, p) => sum + p.netPay, 0);
+
+  // Include completed shifts that are not yet attached to any payroll record.
+  // This prevents "pending pay = 0" when payroll generation has not run yet.
+  const processedShiftIds = allPayrolls.flatMap((payroll) =>
+    (payroll.shifts || []).map((shiftId) => shiftId.toString())
+  );
+
+  const unprocessedCompletedShifts = await Shift.find({
+    employee: userId,
+    status: 'completed',
+    ...(processedShiftIds.length > 0 ? { _id: { $nin: processedShiftIds } } : {}),
+  }).select('hoursWorked');
+
+  const hourlyRate = req.user.hourlyWage || req.user.hourlyRate || 0;
+  const pendingFromUnprocessedShifts = unprocessedCompletedShifts.reduce(
+    (sum, shift) => sum + ((shift.hoursWorked || 0) * hourlyRate),
+    0
+  );
+
+  const totalPending = pendingFromPayrolls + pendingFromUnprocessedShifts;
 
   // Get next shift
   const nextShift = upcomingShifts.length > 0 ? upcomingShifts[0] : null;
@@ -316,6 +339,10 @@ export const getEmployeeDashboard = asyncHandler(async (req, res) => {
       earnings: {
         totalPaid: parseFloat(totalPaid.toFixed(2)),
         pending: parseFloat(totalPending.toFixed(2)),
+      },
+      pendingBreakdown: {
+        fromPayrolls: parseFloat(pendingFromPayrolls.toFixed(2)),
+        estimatedFromCompletedShifts: parseFloat(pendingFromUnprocessedShifts.toFixed(2)),
       },
       recentPayrolls,
       recentNotifications,

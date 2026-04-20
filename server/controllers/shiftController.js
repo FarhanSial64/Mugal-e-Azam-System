@@ -468,7 +468,7 @@ export const updateShift = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: isCompleted && timesChanged ? 'Shift updated and payroll recalculated' : 'Shift updated successfully',
+    message: payrollNeedsRefresh ? 'Shift updated and payroll recalculated' : 'Shift updated successfully',
     data: updatedShift,
   });
 });

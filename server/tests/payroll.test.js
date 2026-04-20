@@ -32,7 +32,6 @@ describe('Payroll API', () => {
     });
 
     const shiftDate = new Date();
-    shiftDate.setDate(shiftDate.getDate() - 1);
 
     await Shift.create({
       employee: employee._id,
@@ -60,6 +59,45 @@ describe('Payroll API', () => {
     expect(payroll).toBeTruthy();
     expect(payroll.totalHours).toBeGreaterThan(0);
     expect(payroll.netPay).toBeGreaterThan(0);
+  });
+
+  it('shows pending pay from completed shifts even before payroll generation', async () => {
+    const { manager } = await getManagerToken();
+    const employee = await User.create({
+      name: 'Dashboard Pending Employee',
+      email: 'dashboard.pending.employee@example.com',
+      phone: '03112226666',
+      password: 'password123',
+      role: 'employee',
+      jobRole: 'waiter',
+      hourlyWage: 12,
+      notificationPreferences: { email: false, sms: false },
+    });
+
+    const employeeToken = generateToken(employee._id);
+
+    const shiftDate = new Date();
+    shiftDate.setDate(shiftDate.getDate() - 1);
+
+    await Shift.create({
+      employee: employee._id,
+      date: shiftDate,
+      startTime: '09:00',
+      endTime: '17:00',
+      shiftType: 'morning',
+      status: 'completed',
+      assignedBy: manager._id,
+      breakDuration: 0,
+    });
+
+    const response = await request(app)
+      .get('/api/dashboard/employee')
+      .set('Authorization', `Bearer ${employeeToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.pendingPay).toBeGreaterThan(0);
+    expect(response.body.data.pendingBreakdown.estimatedFromCompletedShifts).toBeGreaterThan(0);
   });
 
   it('refreshes payroll when a completed shift break duration changes', async () => {

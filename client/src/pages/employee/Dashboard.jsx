@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { dashboardAPI } from '../../services/api';
 import { DashboardLayout } from '../../components/layout';
@@ -8,16 +8,34 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   CurrencyPoundIcon,
+  BanknotesIcon,
   BellIcon,
   ClipboardDocumentCheckIcon,
   SparklesIcon,
   ArrowRightIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+
+const formatCurrency = (value) => `£${Number(value || 0).toFixed(2)}`;
+const formatHours = (value) => `${Number(value || 0).toFixed(2)}h`;
+
+const getShiftStatusVariant = (status) => {
+  const variants = {
+    scheduled: 'info',
+    'in-progress': 'success',
+    completed: 'success',
+    missed: 'danger',
+    cancelled: 'gray',
+  };
+
+  return variants[status] || 'gray';
+};
 
 const EmployeeDashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboard();
@@ -52,6 +70,12 @@ const EmployeeDashboard = () => {
     );
   }
 
+  const employeeFirstName = data?.employee?.name?.split(' ')[0] || 'Team Member';
+  const pendingFromPayrolls = data?.pendingBreakdown?.fromPayrolls || 0;
+  const pendingFromCompletedShifts = data?.pendingBreakdown?.estimatedFromCompletedShifts || 0;
+  const pendingPay = data?.pendingPay || 0;
+  const hasPendingBreakdown = pendingFromPayrolls > 0 || pendingFromCompletedShifts > 0;
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fadeIn">
@@ -63,10 +87,13 @@ const EmployeeDashboard = () => {
                 Your workday
               </div>
               <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                Welcome back, {data?.employee?.name?.split(' ')[0]}!
+                Welcome back, {employeeFirstName}!
               </h1>
               <p className="mt-3 max-w-xl text-sm text-slate-200 sm:text-base">
                 Check today’s shift, view upcoming work, and keep availability up to date from any device.
+              </p>
+              <p className="mt-4 text-xs uppercase tracking-[0.18em] text-slate-300">
+                {format(new Date(), 'EEEE, dd MMMM yyyy')}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -93,22 +120,54 @@ const EmployeeDashboard = () => {
           />
           <StatCard
             title="Hours Worked"
-            value={`${data?.hoursThisWeek || 0}h`}
+            value={formatHours(data?.hoursThisWeek)}
             subtitle="This week"
             icon={ClockIcon}
           />
           <StatCard
             title="Pending Pay"
-            value={`£${data?.pendingPay || 0}`}
-            subtitle="Unpaid wages"
+            value={formatCurrency(pendingPay)}
+            subtitle={
+              pendingFromCompletedShifts > 0
+                ? 'Includes completed shifts awaiting payroll run'
+                : 'Unpaid wages'
+            }
             icon={CurrencyPoundIcon}
           />
           <StatCard
             title="Next Shift"
             value={data?.nextShift ? format(new Date(data.nextShift.date), 'EEE, MMM d') : 'None'}
-            subtitle={data?.nextShift ? `${data.nextShift.startTime}` : 'No upcoming shifts'}
+            subtitle={data?.nextShift ? `${data.nextShift.startTime} (${data.nextShift.shiftType})` : 'No upcoming shifts'}
             icon={ClockIcon}
           />
+        </section>
+
+        <section>
+          <Card title="Pay Visibility" subtitle="Clear breakdown of your pending amount">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">From payroll records</p>
+                <p className="mt-2 text-2xl font-bold text-slate-900">{formatCurrency(pendingFromPayrolls)}</p>
+                <p className="mt-1 text-sm text-slate-500">Already generated but not paid yet.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">From completed shifts</p>
+                <p className="mt-2 text-2xl font-bold text-slate-900">{formatCurrency(pendingFromCompletedShifts)}</p>
+                <p className="mt-1 text-sm text-slate-500">Estimated for completed shifts not yet processed in payroll.</p>
+              </div>
+              <div className="rounded-2xl border border-primary-200 bg-primary-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">Total pending</p>
+                <p className="mt-2 text-2xl font-bold text-primary-800">{formatCurrency(pendingPay)}</p>
+                <p className="mt-1 text-sm text-primary-700">This is the total you can expect to be paid.</p>
+              </div>
+            </div>
+            {!hasPendingBreakdown && (
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                <CheckCircleIcon className="h-5 w-5" />
+                No pending wages right now. You are fully up to date.
+              </div>
+            )}
+          </Card>
         </section>
 
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -125,9 +184,14 @@ const EmployeeDashboard = () => {
                         {data.todayShift.startTime} - {data.todayShift.endTime}
                       </h3>
                       <p className="text-sm text-slate-500 capitalize">{data.todayShift.shiftType} Shift</p>
+                      {data.todayShift.actualCheckIn && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          Checked in: {format(new Date(data.todayShift.actualCheckIn), 'h:mm a')}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <Badge variant={data.todayShift.status === 'in-progress' ? 'success' : 'info'}>
+                  <Badge variant={getShiftStatusVariant(data.todayShift.status)}>
                     {data.todayShift.status}
                   </Badge>
                 </div>
@@ -138,7 +202,7 @@ const EmployeeDashboard = () => {
                 description="Use availability and schedule pages to stay on top of your workweek."
                 icon={CalendarDaysIcon}
                 actionLabel="Check shifts"
-                action={() => window.location.assign('/employee/shifts')}
+                action={() => navigate('/employee/shifts')}
               />
             )}
           </Card>
@@ -190,7 +254,7 @@ const EmployeeDashboard = () => {
                         <p className="text-sm text-slate-500 capitalize">{shift.shiftType}</p>
                       </div>
                     </div>
-                    <Badge variant="info">Scheduled</Badge>
+                    <Badge variant={getShiftStatusVariant(shift.status)}>{shift.status}</Badge>
                   </div>
                 ))}
               </div>
@@ -237,7 +301,17 @@ const EmployeeDashboard = () => {
         </section>
 
         <section>
-          <Card title="Recent Payments" subtitle="What has already been processed">
+          <Card
+            title="Recent Payments"
+            subtitle="Your latest payroll activity"
+            action={
+              <Link to="/employee/payroll">
+                <Button variant="ghost" size="sm" className="text-primary-700">
+                  Open full payroll
+                </Button>
+              </Link>
+            }
+          >
             {data?.recentPayrolls?.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-200">
@@ -255,8 +329,8 @@ const EmployeeDashboard = () => {
                         <td className="px-4 py-3 text-sm text-slate-900">
                           {format(new Date(payroll.weekStartDate), 'MMM d')} - {format(new Date(payroll.weekEndDate), 'MMM d')}
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{payroll.totalHours}h</td>
-                        <td className="px-4 py-3 text-sm font-medium text-slate-900">£{payroll.netPay?.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{formatHours(payroll.totalHours)}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-slate-900">{formatCurrency(payroll.netPay)}</td>
                         <td className="px-4 py-3">
                           <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
                             {payroll.status}
