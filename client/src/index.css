@@ -2,13 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bp-xs: 320px;
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+}
+
+* {
+  min-width: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 /* Custom styles */
 body {
   font-family: 'Inter', system-ui, sans-serif;
   @apply bg-slate-50 text-slate-900 antialiased;
+  margin: 0;
+  overflow-x: hidden;
   background-image:
     radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 30%),
     radial-gradient(circle at top right, rgba(15, 118, 110, 0.05), transparent 24%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+input,
+select,
+textarea,
+a[role='button'] {
+  min-height: 44px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgb(14 165 233);
+  outline-offset: 2px;
 }
 
 /* Custom scrollbar */
@@ -39,7 +94,7 @@ textarea:focus {
 /* Custom button styles */
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex min-h-[44px] items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
@@ -63,7 +118,7 @@ textarea:focus {
   }
 
   .input {
-    @apply block w-full px-3 py-2 text-sm border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    @apply block min-h-[44px] w-full px-3 py-2.5 text-base sm:text-sm border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
   }
 
   .label {
@@ -133,4 +188,26 @@ textarea:focus {
 /* Loading spinner */
 .spinner {
   @apply animate-spin rounded-full border-2 border-slate-300 border-t-primary-600;
+}
+
+@media (max-width: 479px) {
+  html {
+    font-size: 15px;
+  }
+
+  .animate-fadeIn,
+  .animate-slideUp {
+    animation-duration: 0.2s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

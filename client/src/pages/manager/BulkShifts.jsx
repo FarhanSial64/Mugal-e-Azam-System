@@ -568,7 +568,7 @@ const BulkShiftsPage = () => {
               </span>
             }>
               {/* Date Range Picker */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2">
                 <Input
                   type="date"
                   label="From"
@@ -624,7 +624,7 @@ const BulkShiftsPage = () => {
               </div>
 
               {/* Date Grid */}
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
                 {!invalidDateRange && datesInRange.map(date => {
                   const isWeekend = [0, 6].includes(new Date(date).getDay());
                   const now = new Date();
@@ -748,7 +748,7 @@ const BulkShiftsPage = () => {
 
         {/* Summary & Submit */}
         <Card>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-gray-900">Review and Create</h3>
               <p className="text-sm text-gray-600">
@@ -764,12 +764,13 @@ const BulkShiftsPage = () => {
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:justify-end">
               <Button
                 size="lg"
                 onClick={handleSubmit}
                 disabled={!canSubmit}
                 isLoading={submitting}
+                className="w-full sm:w-auto"
               >
                 <DocumentDuplicateIcon className="h-5 w-5 mr-2" />
                 Create Shifts
@@ -781,7 +782,7 @@ const BulkShiftsPage = () => {
         {/* Results */}
         {results && (
           <Card title="Assignment Results">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2">
               <div className="p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center">
                   <CheckCircleIcon className="h-8 w-8 text-green-600 mr-3" />

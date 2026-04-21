@@ -319,86 +319,158 @@ const EmployeesPage = () => {
               action={() => handleOpenModal()}
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wage</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {employees.map((employee) => (
-                    <tr key={employee._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                            <span className="text-primary-600 font-semibold">
-                              {employee.name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{employee.name}</div>
-                            <div className="text-sm text-gray-500">{employee.email}</div>
-                          </div>
+            <>
+              <div className="space-y-3 md:hidden">
+                {employees.map((employee) => (
+                  <div key={employee._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-100">
+                          <span className="font-semibold text-primary-600">
+                            {employee.name.charAt(0).toUpperCase()}
+                          </span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{employee.phone}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant="primary">{employee.jobRole}</Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">£{employee.hourlyWage}/hr</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={employee.isActive ? 'success' : 'danger'}>
-                          {employee.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{employee.name}</p>
+                          <p className="text-xs text-gray-500 break-all">{employee.email}</p>
+                        </div>
+                      </div>
+                      <Badge variant={employee.isActive ? 'success' : 'danger'}>
+                        {employee.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                      <p>
+                        <span className="font-medium text-slate-700">Phone:</span> {employee.phone}
+                      </p>
+                      <p>
+                        <span className="font-medium text-slate-700">Wage:</span> £{employee.hourlyWage}/hr
+                      </p>
+                    </div>
+
+                    <div className="mt-3">
+                      <Badge variant="primary">{employee.jobRole}</Badge>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleOpenModal(employee)}
+                        className="rounded-lg bg-primary-50 px-3 py-2 text-xs font-medium text-primary-700"
+                        title="Edit"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleResetPassword(employee)}
+                        className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700"
+                        title="Reset Password"
+                      >
+                        Reset Password
+                      </button>
+                      {employee.isActive ? (
                         <button
-                          onClick={() => handleOpenModal(employee)}
-                          className="text-primary-600 hover:text-primary-900 p-1"
-                          title="Edit"
+                          onClick={() => handleDelete(employee)}
+                          className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700"
+                          title="Deactivate"
                         >
-                          <PencilSquareIcon className="h-5 w-5" />
+                          Deactivate
                         </button>
+                      ) : (
                         <button
-                          onClick={() => handleResetPassword(employee)}
-                          className="text-yellow-600 hover:text-yellow-900 p-1"
-                          title="Reset Password"
+                          onClick={() => handleReactivate(employee)}
+                          className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700"
+                          title="Reactivate"
                         >
-                          <KeyIcon className="h-5 w-5" />
+                          Reactivate
                         </button>
-                        {employee.isActive ? (
-                          <button
-                            onClick={() => handleDelete(employee)}
-                            className="text-red-600 hover:text-red-900 p-1"
-                            title="Deactivate"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleReactivate(employee)}
-                            className="text-green-600 hover:text-green-900 p-1"
-                            title="Reactivate"
-                          >
-                            <ArrowPathIcon className="h-5 w-5" />
-                          </button>
-                        )}
-                      </td>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Employee</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Wage</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {employees.map((employee) => (
+                      <tr key={employee._id} className="hover:bg-gray-50">
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100">
+                              <span className="font-semibold text-primary-600">
+                                {employee.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                              <div className="text-sm text-gray-500">{employee.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="text-sm text-gray-900">{employee.phone}</div>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <Badge variant="primary">{employee.jobRole}</Badge>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900">£{employee.hourlyWage}/hr</div>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <Badge variant={employee.isActive ? 'success' : 'danger'}>
+                            {employee.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => handleOpenModal(employee)}
+                            className="p-1 text-primary-600 hover:text-primary-900"
+                            title="Edit"
+                          >
+                            <PencilSquareIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleResetPassword(employee)}
+                            className="p-1 text-yellow-600 hover:text-yellow-900"
+                            title="Reset Password"
+                          >
+                            <KeyIcon className="h-5 w-5" />
+                          </button>
+                          {employee.isActive ? (
+                            <button
+                              onClick={() => handleDelete(employee)}
+                              className="p-1 text-red-600 hover:text-red-900"
+                              title="Deactivate"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleReactivate(employee)}
+                              className="p-1 text-green-600 hover:text-green-900"
+                              title="Reactivate"
+                            >
+                              <ArrowPathIcon className="h-5 w-5" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </div>

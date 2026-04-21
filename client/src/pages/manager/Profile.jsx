@@ -145,7 +145,7 @@ const ProfilePage = () => {
         {/* Profile Card */}
         <Card title="Personal Information">
           <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <ProfilePhoto
                 photoUrl={user?.profilePhoto}
                 name={user?.name}
@@ -211,7 +211,7 @@ const ProfilePage = () => {
         {/* Notification Preferences */}
         <Card title="Notification Preferences">
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex flex-col gap-3 rounded-lg bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center space-x-3">
                 <EnvelopeIcon className="h-6 w-6 text-gray-500" />
                 <div>
@@ -230,7 +230,7 @@ const ProfilePage = () => {
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex flex-col gap-3 rounded-lg bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center space-x-3">
                 <PhoneIcon className="h-6 w-6 text-gray-500" />
                 <div>

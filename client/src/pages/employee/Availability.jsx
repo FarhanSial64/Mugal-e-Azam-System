@@ -205,14 +205,14 @@ const EmployeeAvailabilityPage = () => {
 
         {/* Week Navigation */}
         <Card title="Week Navigator" subtitle="Move across weeks and update when your routine changes">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button
               onClick={handlePrevWeek}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+              className="self-start rounded-xl p-2 hover:bg-slate-100 transition-colors sm:self-auto"
             >
               <ChevronLeftIcon className="h-5 w-5 text-slate-600" />
             </button>
-            <div className="flex items-center space-x-4 text-slate-900">
+            <div className="flex w-full flex-col items-start gap-3 text-slate-900 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
               <CalendarDaysIcon className="h-5 w-5 text-primary-600" />
               <span className="font-semibold">
                 Week of {format(currentWeek, 'MMMM d, yyyy')}
@@ -223,7 +223,7 @@ const EmployeeAvailabilityPage = () => {
             </div>
             <button
               onClick={handleNextWeek}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+              className="self-start rounded-xl p-2 hover:bg-slate-100 transition-colors sm:self-auto"
             >
               <ChevronRightIcon className="h-5 w-5 text-slate-600" />
             </button>
@@ -232,7 +232,7 @@ const EmployeeAvailabilityPage = () => {
 
         {/* Quick Actions */}
         <Card title="Quick Actions" subtitle="Apply weekly defaults with one click">
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Button variant="outline" size="sm" onClick={setAllAvailable}>
               Mark All Available
             </Button>

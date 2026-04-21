@@ -18,9 +18,9 @@ const SearchBar = forwardRef(({
   ...props 
 }, ref) => {
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-5 py-2.5 text-base'
+    sm: 'py-2 text-sm',
+    md: 'py-2.5 text-base sm:text-sm',
+    lg: 'py-3 text-base'
   };
 
   const variantClasses = {
@@ -31,7 +31,7 @@ const SearchBar = forwardRef(({
   return (
     <div className={`relative ${className}`}>
       <div className={`
-        flex items-center rounded-lg transition-all duration-200
+        flex min-h-[44px] items-center rounded-lg px-3 transition-all duration-200
         ${variantClasses[variant]}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}>
@@ -64,7 +64,7 @@ const SearchBar = forwardRef(({
               onClear ? onClear() : onChange({ target: { value: '' } });
             }}
             disabled={disabled}
-            className="flex-shrink-0 ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors disabled:cursor-not-allowed"
+            className="flex-shrink-0 ml-2 rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed"
             aria-label="Clear search"
             title="Clear"
           >

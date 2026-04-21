@@ -552,77 +552,121 @@ const ShiftsPage = () => {
               icon={CalendarDaysIcon}
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {visibleShifts.map((shift) => (
-                    <tr key={shift._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-primary-600 font-semibold text-sm">
-                              {shift.employee?.name?.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{shift.employee?.name}</p>
-                            <p className="text-xs text-gray-500">{shift.employee?.jobRole}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {format(new Date(shift.date), 'EEE, MMM d')}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {shift.startTime} - {shift.endTime}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="primary">{shift.shiftType}</Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant={statusColors[shift.status]}>{shift.status}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {shift.hoursWorked > 0 ? `${shift.hoursWorked}h` : '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        {(shift.status === 'scheduled' || shift.status === 'in-progress' || shift.status === 'completed') && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleOpenModal(null, shift)}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                              title={shift.status === 'completed' ? 'Edit times (recalculates pay)' : 'Edit shift'}
-                            >
-                              <PencilSquareIcon className="h-4 w-4" />
-                            </button>
-                            {shift.status !== 'completed' && (
-                              <button
-                                onClick={() => handleCancelShift(shift._id)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                                title="Cancel shift"
-                              >
-                                <XCircleIcon className="h-4 w-4" />
-                              </button>
-                            )}
-                          </div>
+            <>
+              <div className="space-y-3 md:hidden">
+                {visibleShifts.map((shift) => (
+                  <div key={shift._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{shift.employee?.name}</p>
+                        <p className="text-xs text-gray-500">{shift.employee?.jobRole}</p>
+                        <p className="mt-1 text-xs text-gray-500">{format(new Date(shift.date), 'EEE, MMM d')}</p>
+                      </div>
+                      <Badge variant={statusColors[shift.status]}>{shift.status}</Badge>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                      <p><span className="font-medium text-slate-700">Time:</span> {shift.startTime} - {shift.endTime}</p>
+                      <p><span className="font-medium text-slate-700">Type:</span> {shift.shiftType}</p>
+                      <p><span className="font-medium text-slate-700">Hours:</span> {shift.hoursWorked > 0 ? `${shift.hoursWorked}h` : '-'}</p>
+                    </div>
+
+                    {(shift.status === 'scheduled' || shift.status === 'in-progress' || shift.status === 'completed') && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          onClick={() => handleOpenModal(null, shift)}
+                          className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700"
+                          title={shift.status === 'completed' ? 'Edit times (recalculates pay)' : 'Edit shift'}
+                        >
+                          Edit
+                        </button>
+                        {shift.status !== 'completed' && (
+                          <button
+                            onClick={() => handleCancelShift(shift._id)}
+                            className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700"
+                            title="Cancel shift"
+                          >
+                            Cancel
+                          </button>
                         )}
-                      </td>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Employee</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Time</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Type</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Hours</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {visibleShifts.map((shift) => (
+                      <tr key={shift._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center">
+                            <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary-100">
+                              <span className="text-sm font-semibold text-primary-600">
+                                {shift.employee?.name?.charAt(0)}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{shift.employee?.name}</p>
+                              <p className="text-xs text-gray-500">{shift.employee?.jobRole}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {format(new Date(shift.date), 'EEE, MMM d')}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {shift.startTime} - {shift.endTime}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant="primary">{shift.shiftType}</Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant={statusColors[shift.status]}>{shift.status}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {shift.hoursWorked > 0 ? `${shift.hoursWorked}h` : '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          {(shift.status === 'scheduled' || shift.status === 'in-progress' || shift.status === 'completed') && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleOpenModal(null, shift)}
+                                className="rounded p-1.5 text-blue-600 transition-colors hover:bg-blue-50"
+                                title={shift.status === 'completed' ? 'Edit times (recalculates pay)' : 'Edit shift'}
+                              >
+                                <PencilSquareIcon className="h-4 w-4" />
+                              </button>
+                              {shift.status !== 'completed' && (
+                                <button
+                                  onClick={() => handleCancelShift(shift._id)}
+                                  className="rounded p-1.5 text-red-600 transition-colors hover:bg-red-50"
+                                  title="Cancel shift"
+                                >
+                                  <XCircleIcon className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </div>

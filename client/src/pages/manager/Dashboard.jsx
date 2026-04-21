@@ -442,33 +442,51 @@ const ManagerDashboard = () => {
             }
           >
             {data?.payroll?.recent?.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Employee</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {data.payroll.recent.map((payroll) => (
-                      <tr key={payroll._id} className="transition hover:bg-slate-50">
-                        <td className="px-4 py-3">
-                          <span className="font-medium text-slate-900">{payroll.employee?.name}</span>
-                        </td>
-                        <td className="px-4 py-3 text-slate-600">{payroll.totalHours}h</td>
-                        <td className="px-4 py-3 font-medium text-slate-900">£{payroll.netPay?.toFixed(2)}</td>
-                        <td className="px-4 py-3">
-                          <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
-                            {payroll.status}
-                          </Badge>
-                        </td>
+              <div>
+                <div className="space-y-3 md:hidden">
+                  {data.payroll.recent.map((payroll) => (
+                    <div key={payroll._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{payroll.employee?.name}</p>
+                          <p className="text-xs text-slate-500">{payroll.totalHours}h</p>
+                        </div>
+                        <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
+                          {payroll.status}
+                        </Badge>
+                      </div>
+                      <p className="mt-3 text-sm font-semibold text-slate-900">£{payroll.netPay?.toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Employee</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {data.payroll.recent.map((payroll) => (
+                        <tr key={payroll._id} className="transition hover:bg-slate-50">
+                          <td className="px-4 py-3">
+                            <span className="font-medium text-slate-900">{payroll.employee?.name}</span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-600">{payroll.totalHours}h</td>
+                          <td className="px-4 py-3 font-medium text-slate-900">£{payroll.netPay?.toFixed(2)}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
+                              {payroll.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
               <EmptyState

@@ -14,11 +14,11 @@ const StatCard = ({
   };
 
   return (
-    <div className={`bg-white/95 backdrop-blur rounded-2xl shadow-sm shadow-slate-200/70 border border-slate-200 p-6 ${className}`}>
+    <div className={`bg-white/95 backdrop-blur rounded-2xl shadow-sm shadow-slate-200/70 border border-slate-200 p-4 sm:p-6 ${className}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-slate-500">{title}</p>
-          <p className="text-2xl font-bold tracking-tight text-slate-900 mt-1">{value}</p>
+          <p className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{value}</p>
           {subtitle && (
             <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
           )}
@@ -31,8 +31,8 @@ const StatCard = ({
           )}
         </div>
         {Icon && (
-          <div className="p-3 bg-primary-50 rounded-2xl ring-1 ring-primary-100">
-            <Icon className="h-7 w-7 text-primary-600" />
+          <div className="rounded-2xl bg-primary-50 p-2.5 ring-1 ring-primary-100 sm:p-3">
+            <Icon className="h-6 w-6 text-primary-600 sm:h-7 sm:w-7" />
           </div>
         )}
       </div>

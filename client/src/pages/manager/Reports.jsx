@@ -493,60 +493,80 @@ const Reports = () => {
                 icon={UsersIcon}
               />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Job Role</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Spent</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Hours</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Overtime</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Avg Rate</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Records</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {employeeBreakdown.map((emp) => (
-                      <tr key={emp.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{emp.name}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 capitalize">{emp.jobRole}</td>
-                        <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">£{emp.totalSpent.toFixed(2)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 text-center">{emp.totalHours.toFixed(1)}h</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 text-center">{emp.totalOvertimeHours.toFixed(1)}h</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 text-center">£{emp.avgHourlyRate.toFixed(2)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 text-center">{emp.recordCount}</td>
+              <>
+                <div className="space-y-3 md:hidden">
+                  {employeeBreakdown.map((emp) => (
+                    <div key={emp.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{emp.name}</p>
+                          <p className="text-xs capitalize text-gray-500">{emp.jobRole}</p>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">£{emp.totalSpent.toFixed(2)}</p>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <p><span className="font-medium text-slate-700">Hours:</span> {emp.totalHours.toFixed(1)}h</p>
+                        <p><span className="font-medium text-slate-700">Overtime:</span> {emp.totalOvertimeHours.toFixed(1)}h</p>
+                        <p><span className="font-medium text-slate-700">Avg Rate:</span> £{emp.avgHourlyRate.toFixed(2)}</p>
+                        <p><span className="font-medium text-slate-700">Records:</span> {emp.recordCount}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Employee</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Job Role</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Total Spent</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">Hours</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">Overtime</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">Avg Rate</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500">Records</th>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-gray-100">
-                    <tr>
-                      <td colSpan="2" className="px-4 py-3 text-sm font-bold text-gray-900">
-                        Total
-                      </td>
-                      <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">
-                        £
-                        {employeeBreakdown
-                          .reduce((sum, emp) => sum + emp.totalSpent, 0)
-                          .toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-bold text-gray-900 text-center">
-                        {employeeBreakdown
-                          .reduce((sum, emp) => sum + emp.totalHours, 0)
-                          .toFixed(1)}
-                        h
-                      </td>
-                      <td className="px-4 py-3 text-sm font-bold text-gray-900 text-center">
-                        {employeeBreakdown
-                          .reduce((sum, emp) => sum + emp.totalOvertimeHours, 0)
-                          .toFixed(1)}
-                        h
-                      </td>
-                      <td colSpan="2" className="px-4 py-3"></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {employeeBreakdown.map((emp) => (
+                        <tr key={emp.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{emp.name}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600 capitalize">{emp.jobRole}</td>
+                          <td className="px-4 py-3 text-right text-sm font-bold text-gray-900">£{emp.totalSpent.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-center text-sm text-gray-600">{emp.totalHours.toFixed(1)}h</td>
+                          <td className="px-4 py-3 text-center text-sm text-gray-600">{emp.totalOvertimeHours.toFixed(1)}h</td>
+                          <td className="px-4 py-3 text-center text-sm text-gray-600">£{emp.avgHourlyRate.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-center text-sm text-gray-600">{emp.recordCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-gray-100">
+                      <tr>
+                        <td colSpan="2" className="px-4 py-3 text-sm font-bold text-gray-900">Total</td>
+                        <td className="px-4 py-3 text-right text-sm font-bold text-gray-900">
+                          £
+                          {employeeBreakdown
+                            .reduce((sum, emp) => sum + emp.totalSpent, 0)
+                            .toFixed(2)}
+                        </td>
+                        <td className="px-4 py-3 text-center text-sm font-bold text-gray-900">
+                          {employeeBreakdown
+                            .reduce((sum, emp) => sum + emp.totalHours, 0)
+                            .toFixed(1)}
+                          h
+                        </td>
+                        <td className="px-4 py-3 text-center text-sm font-bold text-gray-900">
+                          {employeeBreakdown
+                            .reduce((sum, emp) => sum + emp.totalOvertimeHours, 0)
+                            .toFixed(1)}
+                          h
+                        </td>
+                        <td colSpan="2" className="px-4 py-3"></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </>
             )}
           </Card>
         )}
@@ -602,8 +622,25 @@ const Reports = () => {
               {hourlyBreakdown.length === 0 ? (
                 <EmptyState title="No data" description="No role data available" icon={UsersIcon} />
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                <>
+                  <div className="space-y-3 md:hidden">
+                    {hourlyBreakdown.map((role) => (
+                      <div key={role.role} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold capitalize text-gray-900">{role.role}</p>
+                          <p className="text-sm font-bold text-gray-900">£{role.spending.toFixed(2)}</p>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                          <p><span className="font-medium text-slate-700">Hours:</span> {role.hours.toFixed(1)}h</p>
+                          <p><span className="font-medium text-slate-700">Overtime:</span> {role.overtimeHours.toFixed(1)}h</p>
+                          <p><span className="font-medium text-slate-700">Records:</span> {role.recordCount}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="hidden overflow-x-auto md:block">
+                    <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Job Role</th>
@@ -639,8 +676,9 @@ const Reports = () => {
                         <td></td>
                       </tr>
                     </tfoot>
-                  </table>
-                </div>
+                    </table>
+                  </div>
+                </>
               )}
             </Card>
           </>

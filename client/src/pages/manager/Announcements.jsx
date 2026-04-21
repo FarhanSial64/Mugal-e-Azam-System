@@ -177,7 +177,7 @@ const AnnouncementsPage = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openEdit(item)}
-                        className="p-2 rounded-lg text-primary-700 hover:bg-primary-50"
+                        className="min-h-[44px] min-w-[44px] p-2 rounded-lg text-primary-700 hover:bg-primary-50"
                         title="Edit"
                       >
                         <PencilSquareIcon className="h-5 w-5" />
@@ -185,7 +185,7 @@ const AnnouncementsPage = () => {
                       {item.isActive && (
                         <button
                           onClick={() => handleArchive(item._id)}
-                          className="p-2 rounded-lg text-rose-700 hover:bg-rose-50"
+                          className="min-h-[44px] min-w-[44px] p-2 rounded-lg text-rose-700 hover:bg-rose-50"
                           title="Archive"
                         >
                           <TrashIcon className="h-5 w-5" />
@@ -223,28 +223,47 @@ const AnnouncementsPage = () => {
                   </div>
                   <div className="mt-3 overflow-x-auto">
                     {item.viewers?.length > 0 ? (
-                      <table className="min-w-full divide-y divide-slate-200">
-                        <thead>
-                          <tr>
-                            <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
-                            <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Role</th>
-                            <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Views</th>
-                            <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Last Seen</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
+                      <div>
+                        <div className="space-y-2 md:hidden">
                           {item.viewers.map((viewer) => (
-                            <tr key={`${item.announcementId}-${viewer.userId}`}>
-                              <td className="px-2 py-2 text-sm text-slate-800">{viewer.name}</td>
-                              <td className="px-2 py-2 text-sm text-slate-600 capitalize">{viewer.role}</td>
-                              <td className="px-2 py-2 text-sm text-slate-800">{viewer.viewCount}</td>
-                              <td className="px-2 py-2 text-sm text-slate-600">
-                                {new Date(viewer.lastSeenAt).toLocaleString()}
-                              </td>
-                            </tr>
+                            <div
+                              key={`${item.announcementId}-${viewer.userId}`}
+                              className="rounded-lg border border-slate-200 bg-slate-50 p-3"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-sm font-semibold text-slate-900">{viewer.name}</p>
+                                <span className="text-xs text-slate-500 capitalize">{viewer.role}</span>
+                              </div>
+                              <div className="mt-2 flex items-center justify-between text-sm">
+                                <span className="text-slate-600">Views: {viewer.viewCount}</span>
+                                <span className="text-slate-500">{new Date(viewer.lastSeenAt).toLocaleString()}</span>
+                              </div>
+                            </div>
                           ))}
-                        </tbody>
-                      </table>
+                        </div>
+                        <table className="hidden min-w-full divide-y divide-slate-200 md:table">
+                          <thead>
+                            <tr>
+                              <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
+                              <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Role</th>
+                              <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Views</th>
+                              <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Last Seen</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {item.viewers.map((viewer) => (
+                              <tr key={`${item.announcementId}-${viewer.userId}`}>
+                                <td className="px-2 py-2 text-sm text-slate-800">{viewer.name}</td>
+                                <td className="px-2 py-2 text-sm text-slate-600 capitalize">{viewer.role}</td>
+                                <td className="px-2 py-2 text-sm text-slate-800">{viewer.viewCount}</td>
+                                <td className="px-2 py-2 text-sm text-slate-600">
+                                  {new Date(viewer.lastSeenAt).toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       <p className="text-sm text-slate-500">No viewers yet for this announcement.</p>
                     )}

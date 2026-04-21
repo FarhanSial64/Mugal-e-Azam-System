@@ -58,19 +58,19 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       <aside
         className={`
-          fixed top-0 left-0 z-50 h-full w-64 bg-gray-900 text-white
+          fixed top-0 left-0 z-50 h-full w-[86vw] max-w-xs bg-gray-900 text-white
           transform transition-transform duration-300 ease-in-out
-          lg:translate-x-0 lg:z-auto lg:h-screen lg:sticky
+          lg:w-64 lg:translate-x-0 lg:z-auto lg:h-screen lg:sticky
           flex flex-col
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
+        <div className="flex h-16 items-center justify-between border-b border-gray-800 px-4 sm:px-6">
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-2xl">🍽️</span>
-            <span className="font-bold text-lg">Mughal-e-Azam</span>
+            <span className="text-base font-bold sm:text-lg">Mughal-e-Azam</span>
           </Link>
-          <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-800 rounded">
+          <button onClick={onClose} className="rounded p-2 hover:bg-gray-800 lg:hidden">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -96,7 +96,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               to={item.href}
               onClick={onClose}
               className={`
-                flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+                flex min-h-[44px] items-center space-x-3 rounded-lg px-4 py-2.5 transition-colors
                 ${isActive(item.href)
                   ? 'bg-primary-600 text-white'
                   : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -119,7 +119,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </Link>
           <button
             onClick={logout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-red-600/20 hover:text-red-400 transition-colors"
+            className="flex min-h-[44px] w-full items-center space-x-3 rounded-lg px-4 py-2.5 text-gray-300 transition-colors hover:bg-red-600/20 hover:text-red-400"
           >
             <ArrowLeftOnRectangleIcon className="h-5 w-5" />
             <span className="font-medium">Logout</span>
@@ -147,17 +147,17 @@ const NotificationDrawer = ({
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/25" onClick={onClose} />
-      <aside className="fixed right-4 top-20 z-50 w-[92vw] max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+      <aside className="fixed inset-x-2 top-16 z-50 rounded-2xl border border-slate-200 bg-white shadow-2xl sm:right-4 sm:left-auto sm:top-20 sm:w-[92vw] sm:max-w-md">
+        <div className="flex items-center justify-between border-b border-slate-200 px-3 py-3 sm:px-4">
           <div>
             <h3 className="text-base font-semibold text-slate-900">Notifications</h3>
             <p className="text-xs text-slate-500">{unreadCount} unread items</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button size="sm" variant="secondary" onClick={onMarkAllRead}>
               Mark all read
             </Button>
-            <button onClick={onClose} className="rounded-lg p-1 hover:bg-slate-100">
+            <button onClick={onClose} className="rounded-lg p-2 hover:bg-slate-100">
               <XMarkIcon className="h-5 w-5 text-slate-600" />
             </button>
           </div>
@@ -320,20 +320,21 @@ const Header = ({ onMenuClick }) => {
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 lg:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-3 sm:px-4 lg:px-8">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+            className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
+            aria-label="Open navigation"
           >
             <Bars3Icon className="h-6 w-6 text-gray-600" />
           </button>
-          <h1 className="text-xl font-semibold text-gray-800 hidden sm:block">
+          <h1 className="hidden text-base font-semibold text-gray-800 sm:block lg:text-xl">
             Welcome back, {user?.name?.split(' ')[0]}! 👋
           </h1>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <button
             onClick={() => {
               if (!drawerOpen) {
@@ -341,7 +342,8 @@ const Header = ({ onMenuClick }) => {
               }
               setDrawerOpen((prev) => !prev);
             }}
-            className="relative p-2 hover:bg-gray-100 rounded-lg"
+            className="relative rounded-lg p-2 hover:bg-gray-100"
+            aria-label="Toggle notifications"
           >
             <BellIcon className="h-6 w-6 text-gray-600" />
             {totalBadge > 0 && (
@@ -351,7 +353,7 @@ const Header = ({ onMenuClick }) => {
             )}
           </button>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center">
               <span className="text-white font-semibold text-sm">
                 {user?.name?.charAt(0)?.toUpperCase()}
@@ -379,6 +381,22 @@ const Header = ({ onMenuClick }) => {
 
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isManager } = useAuth();
+  const location = useLocation();
+
+  const quickLinks = isManager
+    ? [
+        { name: 'Home', href: '/manager/dashboard', icon: HomeIcon },
+        { name: 'Shifts', href: '/manager/shifts', icon: CalendarDaysIcon },
+        { name: 'Team', href: '/manager/employees', icon: UsersIcon },
+        { name: 'Pay', href: '/manager/payroll', icon: BanknotesIcon },
+      ]
+    : [
+        { name: 'Home', href: '/employee/dashboard', icon: HomeIcon },
+        { name: 'Shifts', href: '/employee/shifts', icon: CalendarDaysIcon },
+        { name: 'Pay', href: '/employee/payroll', icon: BanknotesIcon },
+        { name: 'Reports', href: '/employee/reports', icon: ChartBarIcon },
+      ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -390,9 +408,29 @@ const DashboardLayout = ({ children }) => {
       <div className="flex-1 flex flex-col min-w-0">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <main className="flex-1 overflow-auto p-3 pb-24 sm:p-4 lg:p-8 lg:pb-8">
           {children}
         </main>
+
+        <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden">
+          <div className="grid grid-cols-4">
+            {quickLinks.map((link) => {
+              const isActive = location.pathname === link.href;
+              return (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className={`flex min-h-[56px] flex-col items-center justify-center gap-1 px-2 text-xs font-medium ${
+                    isActive ? 'text-primary-700' : 'text-slate-500'
+                  }`}
+                >
+                  <link.icon className="h-5 w-5" />
+                  <span>{link.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

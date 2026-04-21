@@ -227,7 +227,7 @@ const ManagerAvailabilityPage = () => {
         </div>
 
         {/* Availability Summary */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           {dayNames.map((day, index) => {
             const date = addDays(currentWeek, index);
             const availableCount = getAvailableCount(day);
@@ -255,7 +255,38 @@ const ManagerAvailabilityPage = () => {
           />
         ) : (
           <Card>
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {filteredEmployees.map((employee) => (
+                <div key={employee._id} className="rounded-xl border border-slate-200 bg-white p-3">
+                  <div className="mb-2">
+                    <p className="text-sm font-semibold text-gray-900">{employee.name}</p>
+                    <p className="text-xs capitalize text-gray-500">{employee.jobRole?.replace('-', ' ')}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {dayNames.map((day, index) => {
+                      const date = addDays(currentWeek, index);
+                      const dayAvail = getDayAvailability(employee._id, day);
+                      return (
+                        <div key={day} className="rounded-lg border border-slate-200 p-2 text-xs">
+                          <p className="font-medium text-slate-700">{dayLabels[index]}</p>
+                          <p className="text-[11px] text-slate-500">{format(date, 'MMM d')}</p>
+                          {dayAvail.isAvailable ? (
+                            <div className="mt-1 text-emerald-700">
+                              <p>{dayAvail.startTime}-{dayAvail.endTime}</p>
+                              {dayAvail.isDefault && <p className="text-[11px] text-gray-400">default</p>}
+                            </div>
+                          ) : (
+                            <p className="mt-1 text-rose-700">Unavailable</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr>

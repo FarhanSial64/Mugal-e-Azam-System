@@ -47,20 +47,20 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 p-3 sm:p-4">
       <div className="w-full max-w-md">
         {/* Logo & Title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl mb-4">
-            <span className="text-4xl">🍽️</span>
+        <div className="mb-6 text-center sm:mb-8">
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-xl sm:h-20 sm:w-20">
+            <span className="text-3xl sm:text-4xl">🍽️</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">Mughal-e-Azam</h1>
+          <h1 className="text-2xl font-bold text-white sm:text-3xl">Mughal-e-Azam</h1>
           <p className="text-primary-200 mt-2">Workforce & Payroll Management</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
+        <div className="rounded-2xl bg-white p-4 shadow-xl sm:p-8">
+          <h2 className="mb-5 text-center text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl">
             Welcome Back
           </h2>
 
@@ -113,7 +113,7 @@ const LoginPage = () => {
           </form>
 
           {/* Demo credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-6 rounded-lg bg-gray-50 p-4">
             <p className="text-xs text-gray-500 font-medium mb-2">Demo Credentials:</p>
             <div className="text-xs text-gray-600 space-y-1">
               <p><strong>Manager:</strong> manager@restaurant.com / manager123</p>

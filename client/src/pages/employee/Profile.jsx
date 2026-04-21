@@ -189,7 +189,7 @@ const EmployeeProfilePage = () => {
         {/* Profile Card */}
         <Card title="Personal Information" subtitle="Update your basic account and contact details">
           <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="flex items-center space-x-4 mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="mb-6 flex flex-col items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center">
               <ProfilePhoto
                 photoUrl={user?.profilePhoto}
                 name={user?.name}
@@ -266,7 +266,7 @@ const EmployeeProfilePage = () => {
         {/* Notification Preferences */}
         <Card title="Notification Preferences" subtitle="Choose how you want to receive schedule and payroll updates">
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center space-x-3">
                 <EnvelopeIcon className="h-6 w-6 text-slate-500" />
                 <div>
@@ -285,7 +285,7 @@ const EmployeeProfilePage = () => {
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center space-x-3">
                 <PhoneIcon className="h-6 w-6 text-slate-500" />
                 <div>

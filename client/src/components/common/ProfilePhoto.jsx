@@ -15,7 +15,7 @@ const ProfilePhoto = ({
   const [imageError, setImageError] = useState(false);
 
   const sizeClasses = {
-    sm: 'w-8 h-8 text-sm',
+    sm: 'w-11 h-11 text-sm',
     md: 'w-12 h-12 text-lg',
     lg: 'w-20 h-20 text-2xl',
     xl: 'w-32 h-32 text-4xl',
@@ -71,6 +71,8 @@ const ProfilePhoto = ({
             alt={name || 'Profile'}
             className="w-full h-full object-cover"
             onError={() => setImageError(true)}
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <span className="font-semibold">{getInitial()}</span>
@@ -100,6 +102,7 @@ const ProfilePhoto = ({
               shadow-lg border-2 border-white
               ${size === 'sm' ? 'scale-75' : ''}
             `}
+            aria-label="Upload profile photo"
           >
             <CameraIcon className="w-4 h-4" />
           </button>
@@ -120,6 +123,7 @@ const ProfilePhoto = ({
                 shadow-lg border-2 border-white
                 ${size === 'sm' ? 'scale-75' : ''}
               `}
+              aria-label="Delete profile photo"
             >
               <TrashIcon className="w-3 h-3" />
             </button>

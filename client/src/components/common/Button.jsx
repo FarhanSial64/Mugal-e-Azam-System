@@ -22,10 +22,10 @@ const Button = forwardRef(({
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
-    xl: 'px-8 py-4 text-lg',
+    sm: 'min-h-[44px] px-3 py-2 text-sm',
+    md: 'min-h-[44px] px-4 py-2.5 text-sm',
+    lg: 'min-h-[48px] px-5 py-3 text-base',
+    xl: 'min-h-[52px] px-6 py-3.5 text-lg',
   };
 
   return (

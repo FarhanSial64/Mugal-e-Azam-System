@@ -313,33 +313,53 @@ const EmployeeDashboard = () => {
             }
           >
             {data?.recentPayrolls?.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Week</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {data.recentPayrolls.map((payroll) => (
-                      <tr key={payroll._id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-sm text-slate-900">
+              <div>
+                <div className="space-y-3 md:hidden">
+                  {data.recentPayrolls.map((payroll) => (
+                    <div key={payroll._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm text-slate-700">
                           {format(new Date(payroll.weekStartDate), 'MMM d')} - {format(new Date(payroll.weekEndDate), 'MMM d')}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{formatHours(payroll.totalHours)}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-slate-900">{formatCurrency(payroll.netPay)}</td>
-                        <td className="px-4 py-3">
-                          <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
-                            {payroll.status}
-                          </Badge>
-                        </td>
+                        </p>
+                        <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
+                          {payroll.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-sm">
+                        <span className="text-slate-600">{formatHours(payroll.totalHours)}</span>
+                        <span className="font-semibold text-slate-900">{formatCurrency(payroll.netPay)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Week</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {data.recentPayrolls.map((payroll) => (
+                        <tr key={payroll._id} className="hover:bg-slate-50">
+                          <td className="px-4 py-3 text-sm text-slate-900">
+                            {format(new Date(payroll.weekStartDate), 'MMM d')} - {format(new Date(payroll.weekEndDate), 'MMM d')}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-600">{formatHours(payroll.totalHours)}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-slate-900">{formatCurrency(payroll.netPay)}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
+                              {payroll.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
               <EmptyState

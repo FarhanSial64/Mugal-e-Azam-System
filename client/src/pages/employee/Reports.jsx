@@ -539,42 +539,71 @@ const EmployeeReportsPage = () => {
               icon={CurrencyPoundIcon}
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Week</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Net Pay</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {(report?.recentPayrolls || []).map((payroll) => (
-                    <tr key={payroll._id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-700">
+            <>
+              <div className="space-y-3 md:hidden">
+                {(report?.recentPayrolls || []).map((payroll) => (
+                  <div key={payroll._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-xs text-slate-700">
                         {format(new Date(payroll.weekStartDate), 'dd MMM yyyy')} - {format(new Date(payroll.weekEndDate), 'dd MMM yyyy')}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right text-slate-700">{formatHours(payroll.totalHours)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold text-slate-900">{formatCurrency(payroll.netPay)}</td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge
-                          variant={
-                            payroll.status === 'paid'
-                              ? 'success'
-                              : payroll.status === 'disputed'
-                              ? 'danger'
-                              : 'warning'
-                          }
-                        >
-                          {payroll.status}
-                        </Badge>
-                      </td>
+                      </p>
+                      <Badge
+                        variant={
+                          payroll.status === 'paid'
+                            ? 'success'
+                            : payroll.status === 'disputed'
+                            ? 'danger'
+                            : 'warning'
+                        }
+                      >
+                        {payroll.status}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-sm">
+                      <span className="text-slate-600">{formatHours(payroll.totalHours)}</span>
+                      <span className="font-semibold text-slate-900">{formatCurrency(payroll.netPay)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Week</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Net Pay</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(report?.recentPayrolls || []).map((payroll) => (
+                      <tr key={payroll._id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3 text-sm text-slate-700">
+                          {format(new Date(payroll.weekStartDate), 'dd MMM yyyy')} - {format(new Date(payroll.weekEndDate), 'dd MMM yyyy')}
+                        </td>
+                        <td className="px-4 py-3 text-right text-sm text-slate-700">{formatHours(payroll.totalHours)}</td>
+                        <td className="px-4 py-3 text-right text-sm font-semibold text-slate-900">{formatCurrency(payroll.netPay)}</td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge
+                            variant={
+                              payroll.status === 'paid'
+                                ? 'success'
+                                : payroll.status === 'disputed'
+                                ? 'danger'
+                                : 'warning'
+                            }
+                          >
+                            {payroll.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </div>

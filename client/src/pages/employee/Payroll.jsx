@@ -112,7 +112,7 @@ const EmployeePayrollPage = () => {
         </section>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Total Earned"
             value={formatCurrency(totals.totalEarned)}
@@ -183,46 +183,48 @@ const EmployeePayrollPage = () => {
                   {/* Main Row */}
                   <button
                     onClick={() => toggleExpand(payroll._id)}
-                    className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+                    className="w-full p-4 hover:bg-slate-50 transition-colors"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
                         payroll.status === 'paid' ? 'bg-emerald-100' : 'bg-amber-100'
-                      }`}>
-                        <CurrencyPoundIcon className={`h-6 w-6 ${
-                          payroll.status === 'paid' ? 'text-emerald-600' : 'text-amber-600'
-                        }`} />
+                        }`}>
+                          <CurrencyPoundIcon className={`h-6 w-6 ${
+                            payroll.status === 'paid' ? 'text-emerald-600' : 'text-amber-600'
+                          }`} />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium text-slate-900">
+                            Week of {format(new Date(payroll.weekStartDate), 'MMM d, yyyy')}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {formatHours(payroll.totalHours)} @ {formatCurrency(payroll.hourlyRate)}/hr
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-left">
-                        <p className="font-medium text-slate-900">
-                          Week of {format(new Date(payroll.weekStartDate), 'MMM d, yyyy')}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {formatHours(payroll.totalHours)} @ {formatCurrency(payroll.hourlyRate)}/hr
-                        </p>
+                      <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
+                        <div className="text-left sm:text-right">
+                          <p className="text-xl font-bold text-slate-900">
+                            {formatCurrency(payroll.netPay)}
+                          </p>
+                          <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
+                            {payroll.status}
+                          </Badge>
+                        </div>
+                        {expandedId === payroll._id ? (
+                          <ChevronUpIcon className="h-5 w-5 text-slate-400" />
+                        ) : (
+                          <ChevronDownIcon className="h-5 w-5 text-slate-400" />
+                        )}
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-slate-900">
-                          {formatCurrency(payroll.netPay)}
-                        </p>
-                        <Badge variant={payroll.status === 'paid' ? 'success' : 'warning'}>
-                          {payroll.status}
-                        </Badge>
-                      </div>
-                      {expandedId === payroll._id ? (
-                        <ChevronUpIcon className="h-5 w-5 text-slate-400" />
-                      ) : (
-                        <ChevronDownIcon className="h-5 w-5 text-slate-400" />
-                      )}
                     </div>
                   </button>
 
                   {/* Expanded Details */}
                   {expandedId === payroll._id && (
                     <div className="px-4 pb-4 bg-slate-50 border-t border-slate-200">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4">
+                      <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
                           <p className="text-sm text-slate-500">Week Period</p>
                           <p className="font-medium text-slate-900">
@@ -334,50 +336,74 @@ const EmployeePayrollPage = () => {
               </p>
               
               {payrollDetails.shifts && payrollDetails.shifts.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Shift Type</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Scheduled Time</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Hours</th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Earnings</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {payrollDetails.shifts
-                        .sort((a, b) => new Date(a.date) - new Date(b.date))
-                        .map((shift, index) => (
-                        <tr key={shift._id || index} className="hover:bg-slate-50">
-                          <td className="px-4 py-3">
-                            <div className="font-medium text-slate-900">
+                <div>
+                  <div className="space-y-3 md:hidden">
+                    {payrollDetails.shifts
+                      .sort((a, b) => new Date(a.date) - new Date(b.date))
+                      .map((shift, index) => (
+                        <div key={shift._id || index} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-semibold text-slate-900">
                               {format(new Date(shift.date), 'EEE, MMM d')}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                            </p>
+                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium capitalize text-blue-800">
                               {shift.shiftType || 'Regular'}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-600">
-                            {shift.startTime} - {shift.endTime}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="font-semibold text-slate-900">
-                              {formatHours(shift.hoursWorked || 0)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-right">
+                          </div>
+                          <p className="mt-2 text-sm text-gray-600">{shift.startTime} - {shift.endTime}</p>
+                          <div className="mt-2 flex items-center justify-between text-sm">
+                            <span className="font-semibold text-slate-900">{formatHours(shift.hoursWorked || 0)}</span>
                             <span className="font-semibold text-emerald-600">
                               {formatCurrency((shift.hoursWorked || 0) * payrollDetails.hourlyRate)}
                             </span>
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                    {/* Totals Row */}
-                    <tfoot className="bg-slate-100">
+                  </div>
+                  <div className="hidden overflow-x-auto md:block">
+                    <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Shift Type</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Scheduled Time</th>
+                          <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Hours</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Earnings</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        {payrollDetails.shifts
+                          .sort((a, b) => new Date(a.date) - new Date(b.date))
+                          .map((shift, index) => (
+                          <tr key={shift._id || index} className="hover:bg-slate-50">
+                            <td className="px-4 py-3">
+                              <div className="font-medium text-slate-900">
+                                {format(new Date(shift.date), 'EEE, MMM d')}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                                {shift.shiftType || 'Regular'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {shift.startTime} - {shift.endTime}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className="font-semibold text-slate-900">
+                                {formatHours(shift.hoursWorked || 0)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="font-semibold text-emerald-600">
+                                {formatCurrency((shift.hoursWorked || 0) * payrollDetails.hourlyRate)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      {/* Totals Row */}
+                      <tfoot className="bg-slate-100">
                       <tr>
                         <td colSpan="3" className="px-4 py-3 text-right font-semibold text-slate-700">
                           Total:
@@ -391,6 +417,7 @@ const EmployeePayrollPage = () => {
                       </tr>
                     </tfoot>
                   </table>
+                </div>
                 </div>
               ) : (
                 <div className="text-center py-8 bg-slate-50 rounded-lg">

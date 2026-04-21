@@ -361,75 +361,103 @@ const PayrollPage = () => {
               action={() => setIsCalculateModalOpen(true)}
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Week</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gross</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net Pay</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {visiblePayrolls.map((payroll) => (
-                    <tr key={payroll._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-primary-600 font-semibold text-sm">
-                              {payroll.employee?.name?.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{payroll.employee?.name}</p>
-                            <p className="text-xs text-gray-500">{payroll.employee?.jobRole}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {format(new Date(payroll.weekStartDate), 'MMM d')} - {format(new Date(payroll.weekEndDate), 'MMM d')}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{payroll.totalHours}h</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">£{payroll.hourlyRate}/hr</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">£{payroll.grossPay?.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">£{payroll.netPay?.toFixed(2)}</td>
-                      <td className="px-4 py-3">{getStatusBadge(payroll.status)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => handleViewDetails(payroll)}
-                            title="View Details"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </Button>
-                          {payroll.status !== 'paid' && (
-                            <Button
-                              size="sm"
-                              variant="success"
-                              onClick={() => handleOpenPayModal(payroll)}
-                            >
-                              Mark Paid
-                            </Button>
-                          )}
-                          {payroll.status === 'paid' && (
-                            <span className="text-xs text-gray-500">
-                              Paid via {payroll.paymentMethod}
-                            </span>
-                          )}
-                        </div>
-                      </td>
+            <>
+              <div className="space-y-3 md:hidden">
+                {visiblePayrolls.map((payroll) => (
+                  <div key={payroll._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{payroll.employee?.name}</p>
+                        <p className="text-xs capitalize text-gray-500">{payroll.employee?.jobRole}</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {format(new Date(payroll.weekStartDate), 'MMM d')} - {format(new Date(payroll.weekEndDate), 'MMM d')}
+                        </p>
+                      </div>
+                      {getStatusBadge(payroll.status)}
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                      <p><span className="font-medium text-slate-700">Hours:</span> {payroll.totalHours}h</p>
+                      <p><span className="font-medium text-slate-700">Rate:</span> £{payroll.hourlyRate}/hr</p>
+                      <p><span className="font-medium text-slate-700">Gross:</span> £{payroll.grossPay?.toFixed(2)}</p>
+                      <p><span className="font-medium text-slate-700">Net:</span> £{payroll.netPay?.toFixed(2)}</p>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <Button size="sm" variant="secondary" onClick={() => handleViewDetails(payroll)} title="View Details">
+                        View Details
+                      </Button>
+                      {payroll.status !== 'paid' ? (
+                        <Button size="sm" variant="success" onClick={() => handleOpenPayModal(payroll)}>
+                          Mark Paid
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-gray-500">Paid via {payroll.paymentMethod}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Employee</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Week</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Hours</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Rate</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Gross</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Net Pay</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {visiblePayrolls.map((payroll) => (
+                      <tr key={payroll._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center">
+                            <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary-100">
+                              <span className="text-sm font-semibold text-primary-600">
+                                {payroll.employee?.name?.charAt(0)}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{payroll.employee?.name}</p>
+                              <p className="text-xs text-gray-500">{payroll.employee?.jobRole}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {format(new Date(payroll.weekStartDate), 'MMM d')} - {format(new Date(payroll.weekEndDate), 'MMM d')}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{payroll.totalHours}h</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">£{payroll.hourlyRate}/hr</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">£{payroll.grossPay?.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-gray-900">£{payroll.netPay?.toFixed(2)}</td>
+                        <td className="px-4 py-3">{getStatusBadge(payroll.status)}</td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button size="sm" variant="secondary" onClick={() => handleViewDetails(payroll)} title="View Details">
+                              <EyeIcon className="h-4 w-4" />
+                            </Button>
+                            {payroll.status !== 'paid' && (
+                              <Button size="sm" variant="success" onClick={() => handleOpenPayModal(payroll)}>
+                                Mark Paid
+                              </Button>
+                            )}
+                            {payroll.status === 'paid' && (
+                              <span className="text-xs text-gray-500">Paid via {payroll.paymentMethod}</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </div>

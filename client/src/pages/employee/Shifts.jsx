@@ -287,40 +287,60 @@ const EmployeeShiftsPage = () => {
               icon={CalendarDaysIcon}
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Time</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {shifts.map((shift) => (
-                    <tr key={shift._id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        {format(new Date(shift.date), 'EEE, MMM d')}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        {shift.startTime} - {shift.endTime}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="primary">{shift.shiftType}</Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant={statusColors[shift.status]}>{shift.status}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
-                        {shift.hoursWorked > 0 ? formatHours(shift.hoursWorked) : '-'}
-                      </td>
+            <>
+              <div className="space-y-3 md:hidden">
+                {shifts.map((shift) => (
+                  <div key={shift._id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{format(new Date(shift.date), 'EEE, MMM d')}</p>
+                        <p className="text-xs text-slate-600">{shift.startTime} - {shift.endTime}</p>
+                      </div>
+                      <Badge variant={statusColors[shift.status]}>{shift.status}</Badge>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
+                      <Badge variant="primary">{shift.shiftType}</Badge>
+                      <span>{shift.hoursWorked > 0 ? formatHours(shift.hoursWorked) : '-'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Time</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Type</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hours</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {shifts.map((shift) => (
+                      <tr key={shift._id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3 text-sm text-slate-900">
+                          {format(new Date(shift.date), 'EEE, MMM d')}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-900">
+                          {shift.startTime} - {shift.endTime}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant="primary">{shift.shiftType}</Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant={statusColors[shift.status]}>{shift.status}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-900">
+                          {shift.hoursWorked > 0 ? formatHours(shift.hoursWorked) : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </div>

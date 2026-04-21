@@ -100,19 +100,19 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 p-3 sm:p-4">
       <div className="w-full max-w-lg">
         {/* Logo & Title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
+        <div className="mb-6 text-center sm:mb-8">
+          <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg sm:h-16 sm:w-16">
             <span className="text-3xl">🍽️</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">Join Our Team</h1>
+          <h1 className="text-2xl font-bold text-white sm:text-3xl">Join Our Team</h1>
           <p className="text-primary-200 mt-2">Create your employee account</p>
         </div>
 
         {/* Signup Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="rounded-2xl bg-white p-4 shadow-xl sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Full Name"

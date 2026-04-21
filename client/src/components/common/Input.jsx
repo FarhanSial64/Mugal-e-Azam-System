@@ -42,7 +42,7 @@ const Input = forwardRef(({
         <input
           ref={ref}
           className={`
-            block w-full px-3 py-2 text-sm transition-all duration-200
+            block min-h-[44px] w-full px-3 py-2.5 text-base sm:text-sm transition-all duration-200
             placeholder-gray-400
             ${leftIcon ? 'pl-10' : ''}
             ${rightIcon && !showClearButton ? 'pr-10' : ''}
@@ -63,7 +63,7 @@ const Input = forwardRef(({
           <button
             type="button"
             onClick={() => onClear ? onClear() : ref.current && (ref.current.value = '')}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 transition-colors"
             aria-label="Clear input"
           >
             <XMarkIcon className="h-4 w-4" />
